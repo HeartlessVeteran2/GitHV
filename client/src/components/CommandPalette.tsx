@@ -1,151 +1,308 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, GitCommit, FileText, Terminal } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator
+} from "@/components/ui/command";
+import { 
+  Search, 
+  File, 
+  GitBranch, 
+  Terminal, 
+  Settings, 
+  Play,
+  Save,
+  Folder,
+  Code,
+  Zap,
+  Mic,
+  Eye
+} from "lucide-react";
+
+interface CommandAction {
+  id: string;
+  title: string;
+  subtitle?: string;
+  icon: any;
+  action: () => void;
+  category: string;
+  keywords: string[];
+  shortcut?: string;
+}
 
 interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
-  onCommand: (command: string) => void;
+  onFileOpen: (path: string) => void;
+  onGitAction: (action: string) => void;
+  onTerminalOpen: () => void;
+  onSettingsOpen: () => void;
+  onSave: () => void;
+  onRun: () => void;
+  onSearch: () => void;
+  onVoiceCommand: () => void;
+  onPreviewToggle: () => void;
 }
 
-interface Command {
-  id: string;
-  title: string;
-  description: string;
-  action: string;
-  icon: React.ReactNode;
-}
+export default function CommandPalette({
+  isOpen,
+  onClose,
+  onFileOpen,
+  onGitAction,
+  onTerminalOpen,
+  onSettingsOpen,
+  onSave,
+  onRun,
+  onSearch,
+  onVoiceCommand,
+  onPreviewToggle
+}: CommandPaletteProps) {
+  const [searchValue, setSearchValue] = useState("");
 
-const commands: Command[] = [
-  {
-    id: "git-commit",
-    title: "Git: Commit",
-    description: "Create a new commit",
-    action: "git.commit",
-    icon: <GitCommit className="h-4 w-4" />
-  },
-  {
-    id: "file-new",
-    title: "File: New File",
-    description: "Create a new file",
-    action: "file.new",
-    icon: <FileText className="h-4 w-4" />
-  },
-  {
-    id: "terminal-clear",
-    title: "Terminal: Clear",
-    description: "Clear terminal output",
-    action: "terminal.clear",
-    icon: <Terminal className="h-4 w-4" />
-  },
-  {
-    id: "git-push",
-    title: "Git: Push",
-    description: "Push changes to remote repository",
-    action: "git.push",
-    icon: <GitCommit className="h-4 w-4" />
-  }
-];
+  const commands: CommandAction[] = [
+    // File operations
+    {
+      id: "file-save",
+      title: "Save File",
+      subtitle: "Save the current file",
+      icon: Save,
+      action: onSave,
+      category: "File",
+      keywords: ["save", "write", "persist"],
+      shortcut: "⌘ S"
+    },
+    {
+      id: "file-search",
+      title: "Global Search",
+      subtitle: "Search across all files",
+      icon: Search,
+      action: onSearch,
+      category: "File",
+      keywords: ["search", "find", "grep"],
+      shortcut: "⌘ F"
+    },
+    {
+      id: "file-new",
+      title: "New File",
+      subtitle: "Create a new file",
+      icon: File,
+      action: () => onFileOpen("untitled"),
+      category: "File",
+      keywords: ["new", "create", "file"],
+      shortcut: "⌘ N"
+    },
+    
+    // Git operations
+    {
+      id: "git-status",
+      title: "Git Status",
+      subtitle: "View repository status",
+      icon: GitBranch,
+      action: () => onGitAction("status"),
+      category: "Git",
+      keywords: ["git", "status", "changes"],
+      shortcut: "⌘ G S"
+    },
+    {
+      id: "git-commit",
+      title: "Git Commit",
+      subtitle: "Commit changes",
+      icon: GitBranch,
+      action: () => onGitAction("commit"),
+      category: "Git",
+      keywords: ["git", "commit", "save"],
+      shortcut: "⌘ G C"
+    },
+    {
+      id: "git-branch",
+      title: "Switch Branch",
+      subtitle: "Change active branch",
+      icon: GitBranch,
+      action: () => onGitAction("branch"),
+      category: "Git",
+      keywords: ["git", "branch", "switch", "checkout"]
+    },
+    {
+      id: "git-pull",
+      title: "Git Pull",
+      subtitle: "Pull latest changes",
+      icon: GitBranch,
+      action: () => onGitAction("pull"),
+      category: "Git",
+      keywords: ["git", "pull", "fetch", "sync"]
+    },
+    {
+      id: "git-push",
+      title: "Git Push",
+      subtitle: "Push changes to remote",
+      icon: GitBranch,
+      action: () => onGitAction("push"),
+      category: "Git",
+      keywords: ["git", "push", "upload", "sync"]
+    },
+    
+    // Development operations
+    {
+      id: "dev-run",
+      title: "Run Code",
+      subtitle: "Execute the current file or project",
+      icon: Play,
+      action: onRun,
+      category: "Development",
+      keywords: ["run", "execute", "start", "launch"],
+      shortcut: "⌘ R"
+    },
+    {
+      id: "dev-terminal",
+      title: "Open Terminal",
+      subtitle: "Open integrated terminal",
+      icon: Terminal,
+      action: onTerminalOpen,
+      category: "Development",
+      keywords: ["terminal", "console", "shell", "cmd"],
+      shortcut: "⌘ `"
+    },
+    {
+      id: "dev-preview",
+      title: "Toggle Preview",
+      subtitle: "Show/hide preview pane",
+      icon: Eye,
+      action: onPreviewToggle,
+      category: "Development",
+      keywords: ["preview", "view", "show", "render"],
+      shortcut: "⌘ P"
+    },
+    
+    // AI and Voice
+    {
+      id: "ai-voice",
+      title: "Voice Command",
+      subtitle: "Start voice input",
+      icon: Mic,
+      action: onVoiceCommand,
+      category: "AI",
+      keywords: ["voice", "speak", "ai", "assistant"],
+      shortcut: "⌘ ⇧ V"
+    },
+    {
+      id: "ai-complete",
+      title: "Code Completion",
+      subtitle: "Trigger AI code completion",
+      icon: Zap,
+      action: () => {/* Trigger completion */},
+      category: "AI",
+      keywords: ["complete", "ai", "suggest", "auto"],
+      shortcut: "Ctrl Space"
+    },
+    
+    // Settings
+    {
+      id: "settings-open",
+      title: "Open Settings",
+      subtitle: "Configure application settings",
+      icon: Settings,
+      action: onSettingsOpen,
+      category: "Settings",
+      keywords: ["settings", "config", "preferences"],
+      shortcut: "⌘ ,"
+    }
+  ];
 
-export default function CommandPalette({ isOpen, onClose, onCommand }: CommandPaletteProps) {
-  const [search, setSearch] = useState("");
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const filteredCommands = commands.filter(command => {
+    if (!searchValue) return true;
+    
+    const searchLower = searchValue.toLowerCase();
+    return (
+      command.title.toLowerCase().includes(searchLower) ||
+      command.subtitle?.toLowerCase().includes(searchLower) ||
+      command.keywords.some(keyword => keyword.toLowerCase().includes(searchLower)) ||
+      command.category.toLowerCase().includes(searchLower)
+    );
+  });
 
-  const filteredCommands = commands.filter(command =>
-    command.title.toLowerCase().includes(search.toLowerCase()) ||
-    command.description.toLowerCase().includes(search.toLowerCase())
-  );
+  const groupedCommands = filteredCommands.reduce((groups, command) => {
+    const category = command.category;
+    if (!groups[category]) {
+      groups[category] = [];
+    }
+    groups[category].push(command);
+    return groups;
+  }, {} as Record<string, CommandAction[]>);
 
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [search]);
+  const handleCommandSelect = (command: CommandAction) => {
+    command.action();
+    onClose();
+    setSearchValue("");
+  };
 
   useEffect(() => {
     if (!isOpen) {
-      setSearch("");
-      setSelectedIndex(0);
+      setSearchValue("");
     }
   }, [isOpen]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    switch (e.key) {
-      case "ArrowDown":
+  // Keyboard shortcuts handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Command palette toggle
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "P") {
         e.preventDefault();
-        setSelectedIndex(prev => 
-          prev < filteredCommands.length - 1 ? prev + 1 : 0
-        );
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        setSelectedIndex(prev => 
-          prev > 0 ? prev - 1 : filteredCommands.length - 1
-        );
-        break;
-      case "Enter":
-        e.preventDefault();
-        if (filteredCommands[selectedIndex]) {
-          onCommand(filteredCommands[selectedIndex].action);
-          onClose();
+        if (!isOpen) {
+          // onOpen would be called by parent
         }
-        break;
-      case "Escape":
-        onClose();
-        break;
-    }
-  };
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-dark-surface border-dark-border max-w-2xl p-0">
-        <div className="p-4 border-b border-dark-border">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Type a command..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="pl-10 bg-dark-bg border-dark-border text-dark-text"
-              autoFocus
-            />
-          </div>
-        </div>
+    <CommandDialog open={isOpen} onOpenChange={onClose}>
+      <CommandInput 
+        placeholder="Type a command or search..." 
+        value={searchValue}
+        onValueChange={setSearchValue}
+        className="border-dark-border"
+      />
+      <CommandList>
+        <CommandEmpty>No results found.</CommandEmpty>
         
-        <ScrollArea className="max-h-96">
-          <div className="p-2">
-            {filteredCommands.map((command, index) => (
-              <Button
+        {Object.entries(groupedCommands).map(([category, categoryCommands]) => (
+          <CommandGroup key={category} heading={category}>
+            {categoryCommands.map((command) => (
+              <CommandItem
                 key={command.id}
-                variant="ghost"
-                className={`w-full justify-start p-3 h-auto ${
-                  index === selectedIndex ? 'bg-dark-bg' : ''
-                }`}
-                onClick={() => {
-                  onCommand(command.action);
-                  onClose();
-                }}
+                onSelect={() => handleCommandSelect(command)}
+                className="flex items-center space-x-3 p-3 cursor-pointer"
               >
-                <div className="flex items-center space-x-3">
-                  {command.icon}
-                  <div className="text-left">
-                    <div className="font-medium text-sm">{command.title}</div>
-                    <div className="text-gray-400 text-xs">{command.description}</div>
-                  </div>
+                <command.icon className="h-4 w-4 text-gray-400" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-sm">{command.title}</div>
+                  {command.subtitle && (
+                    <div className="text-xs text-gray-400">{command.subtitle}</div>
+                  )}
                 </div>
-              </Button>
+                {command.shortcut && (
+                  <Badge variant="outline" className="text-xs font-mono">
+                    {command.shortcut}
+                  </Badge>
+                )}
+              </CommandItem>
             ))}
-            
-            {filteredCommands.length === 0 && (
-              <div className="p-4 text-center text-gray-400">
-                No commands found
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+            <CommandSeparator />
+          </CommandGroup>
+        ))}
+      </CommandList>
+    </CommandDialog>
   );
 }

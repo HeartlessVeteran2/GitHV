@@ -8,8 +8,6 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import CodeEditor from "@/components/CodeEditor";
 import Terminal from "@/components/Terminal";
-import TouchToolbar from "@/components/TouchToolbar";
-import CommandPalette from "@/components/CommandPalette";
 import FileExplorer from "@/components/FileExplorer";
 import { Button } from "@/components/ui/button";
 import type { Repository, File as FileType } from "@shared/schema";
@@ -21,10 +19,10 @@ export default function Home() {
   
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [terminalVisible, setTerminalVisible] = useState(true);
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [currentRepository, setCurrentRepository] = useState<Repository | null>(null);
   const [openFiles, setOpenFiles] = useState<FileType[]>([]);
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -186,7 +184,17 @@ export default function Home() {
           fileId: activeFileId,
           content: activeFile.content || ""
         });
+        setHasUnsavedChanges(false);
       }
+    }
+  };
+
+  const handleRun = () => {
+    if (activeFileId) {
+      toast({
+        title: "Running Code",
+        description: "Code execution feature is coming soon",
+      });
     }
   };
 
@@ -292,24 +300,15 @@ export default function Home() {
               onFileClose={handleFileClose}
               onFileChange={handleFileChange}
               onActiveFileChange={setActiveFileId}
+              repositories={repositories}
+              onSave={handleSave}
+              onRun={handleRun}
             />
           )}
           
           {terminalVisible && <Terminal />}
         </div>
       </div>
-
-      <TouchToolbar
-        onSave={handleSave}
-        onSearch={() => setCommandPaletteOpen(true)}
-        onToggleTerminal={() => setTerminalVisible(!terminalVisible)}
-      />
-
-      <CommandPalette
-        isOpen={commandPaletteOpen}
-        onClose={() => setCommandPaletteOpen(false)}
-        onCommand={handleCommand}
-      />
     </div>
   );
 }
