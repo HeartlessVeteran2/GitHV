@@ -3,6 +3,14 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { 
+  generateCodeCompletion, 
+  analyzeCode, 
+  generateDocumentation, 
+  explainCode, 
+  generateTests, 
+  refactorCode 
+} from "./gemini";
 import { GitHubService } from "./github";
 import { insertRepositorySchema, insertFileSchema } from "@shared/schema";
 
@@ -199,6 +207,249 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating file:", error);
       res.status(500).json({ message: "Failed to update file" });
+    }
+  });
+
+  // Gemini AI endpoints
+  app.post("/api/ai/code-completion", isAuthenticated, async (req, res) => {
+    try {
+      const { code, language, cursorPosition } = req.body;
+      const suggestions = await generateCodeCompletion(code, language, cursorPosition);
+      res.json({ suggestions });
+    } catch (error) {
+      console.error("Code completion error:", error);
+      res.status(500).json({ message: "Code completion failed" });
+    }
+  });
+
+  app.post("/api/ai/analyze-code", isAuthenticated, async (req, res) => {
+    try {
+      const { code, language } = req.body;
+      const analysis = await analyzeCode(code, language);
+      res.json(analysis);
+    } catch (error) {
+      console.error("Code analysis error:", error);
+      res.status(500).json({ message: "Code analysis failed" });
+    }
+  });
+
+  app.post("/api/ai/generate-docs", isAuthenticated, async (req, res) => {
+    try {
+      const { code, language } = req.body;
+      const documentation = await generateDocumentation(code, language);
+      res.json({ documentation });
+    } catch (error) {
+      console.error("Documentation generation error:", error);
+      res.status(500).json({ message: "Documentation generation failed" });
+    }
+  });
+
+  app.post("/api/ai/explain-code", isAuthenticated, async (req, res) => {
+    try {
+      const { code, language } = req.body;
+      const explanation = await explainCode(code, language);
+      res.json({ explanation });
+    } catch (error) {
+      console.error("Code explanation error:", error);
+      res.status(500).json({ message: "Code explanation failed" });
+    }
+  });
+
+  app.post("/api/ai/generate-tests", isAuthenticated, async (req, res) => {
+    try {
+      const { code, language } = req.body;
+      const tests = await generateTests(code, language);
+      res.json({ tests });
+    } catch (error) {
+      console.error("Test generation error:", error);
+      res.status(500).json({ message: "Test generation failed" });
+    }
+  });
+
+  app.post("/api/ai/refactor-code", isAuthenticated, async (req, res) => {
+    try {
+      const { code, language, instructions } = req.body;
+      const refactoredCode = await refactorCode(code, language, instructions);
+      res.json({ refactoredCode });
+    } catch (error) {
+      console.error("Code refactoring error:", error);
+      res.status(500).json({ message: "Code refactoring failed" });
+    }
+  });
+
+  // Enhanced GitHub API endpoints
+  app.get("/api/github/user", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      const githubUser = await github.getUser();
+      res.json(githubUser);
+    } catch (error) {
+      console.error("Error fetching GitHub user:", error);
+      res.status(500).json({ message: "Failed to fetch GitHub user" });
+    }
+  });
+
+  app.get("/api/github/:owner/:repo/pulls", isAuthenticated, async (req: any, res) => {
+    try {
+      const { owner, repo } = req.params;
+      const { state = 'open' } = req.query;
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      const pullRequests = await github.getPullRequests(owner, repo, state);
+      res.json(pullRequests);
+    } catch (error) {
+      console.error("Error fetching pull requests:", error);
+      res.status(500).json({ message: "Failed to fetch pull requests" });
+    }
+  });
+
+  app.get("/api/github/:owner/:repo/issues", isAuthenticated, async (req: any, res) => {
+    try {
+      const { owner, repo } = req.params;
+      const { state = 'open' } = req.query;
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      const issues = await github.getIssues(owner, repo, state);
+      res.json(issues);
+    } catch (error) {
+      console.error("Error fetching issues:", error);
+      res.status(500).json({ message: "Failed to fetch issues" });
+    }
+  });
+
+  app.get("/api/github/:owner/:repo/releases", isAuthenticated, async (req: any, res) => {
+    try {
+      const { owner, repo } = req.params;
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      const releases = await github.getReleases(owner, repo);
+      res.json(releases);
+    } catch (error) {
+      console.error("Error fetching releases:", error);
+      res.status(500).json({ message: "Failed to fetch releases" });
+    }
+  });
+
+  app.get("/api/github/:owner/:repo/stats", isAuthenticated, async (req: any, res) => {
+    try {
+      const { owner, repo } = req.params;
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      const stats = await github.getRepositoryStats(owner, repo);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching repository stats:", error);
+      res.status(500).json({ message: "Failed to fetch repository stats" });
+    }
+  });
+
+  app.post("/api/github/:owner/:repo/branches", isAuthenticated, async (req: any, res) => {
+    try {
+      const { owner, repo } = req.params;
+      const { branchName, fromBranch } = req.body;
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      const branch = await github.createBranch(owner, repo, branchName, fromBranch);
+      res.json(branch);
+    } catch (error) {
+      console.error("Error creating branch:", error);
+      res.status(500).json({ message: "Failed to create branch" });
+    }
+  });
+
+  app.post("/api/github/:owner/:repo/pulls", isAuthenticated, async (req: any, res) => {
+    try {
+      const { owner, repo } = req.params;
+      const { title, body, head, base } = req.body;
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      const pullRequest = await github.createPullRequest(owner, repo, title, body, head, base);
+      res.json(pullRequest);
+    } catch (error) {
+      console.error("Error creating pull request:", error);
+      res.status(500).json({ message: "Failed to create pull request" });
+    }
+  });
+
+  app.post("/api/github/:owner/:repo/issues", isAuthenticated, async (req: any, res) => {
+    try {
+      const { owner, repo } = req.params;
+      const { title, body, labels } = req.body;
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      const issue = await github.createIssue(owner, repo, title, body, labels);
+      res.json(issue);
+    } catch (error) {
+      console.error("Error creating issue:", error);
+      res.status(500).json({ message: "Failed to create issue" });
+    }
+  });
+
+  app.get("/api/github/search/repositories", isAuthenticated, async (req: any, res) => {
+    try {
+      const { q, sort } = req.query;
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      const repositories = await github.searchRepositories(q, sort);
+      res.json(repositories);
+    } catch (error) {
+      console.error("Error searching repositories:", error);
+      res.status(500).json({ message: "Failed to search repositories" });
     }
   });
 
