@@ -17,6 +17,7 @@ import {
   ChevronRight, ChevronDown, File, Bug, TestTube, Zap,
   Bot, Brain, Sparkles, Monitor, Sun, Moon, MoreHorizontal
 } from "lucide-react";
+import FloatingAIAssistant from "./FloatingAIAssistant";
 import type { Repository, File as FileType } from "@shared/schema";
 
 interface AndroidStudioLayoutProps {
@@ -36,6 +37,9 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [aiPanelOpen, setAiPanelOpen] = useState(true);
+  const [currentCode, setCurrentCode] = useState("");
+  const [cursorPosition, setCursorPosition] = useState(0);
+  const [selectedText, setSelectedText] = useState("");
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -391,13 +395,24 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
                   )}
 
                   {/* Editor Content */}
-                  <div className="flex-1 p-4">
+                  <div className="flex-1 p-4 relative">
                     {activeFileId ? (
                       <div className="h-full">
                         <div className="bg-black rounded-lg p-4 h-full font-mono text-sm">
-                          <pre className="text-green-400 whitespace-pre-wrap">
-                            {openFiles.find(f => f.id === activeFileId)?.content || '// Loading...'}
-                          </pre>
+                          <textarea
+                            className="w-full h-full bg-transparent text-green-400 resize-none outline-none"
+                            value={currentCode || openFiles.find(f => f.id === activeFileId)?.content || '// Loading...'}
+                            onChange={(e) => {
+                              setCurrentCode(e.target.value);
+                              setCursorPosition(e.target.selectionStart);
+                            }}
+                            onSelect={(e) => {
+                              const target = e.target as HTMLTextAreaElement;
+                              setCursorPosition(target.selectionStart);
+                              setSelectedText(target.value.substring(target.selectionStart, target.selectionEnd));
+                            }}
+                            placeholder="Start typing your code..."
+                          />
                         </div>
                       </div>
                     ) : (
@@ -545,6 +560,31 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
           <span>TypeScript</span>
         </div>
       </div>
+
+      {/* Floating AI Assistant */}
+      {activeFileId && (
+        <FloatingAIAssistant
+          code={currentCode || openFiles.find(f => f.id === activeFileId)?.content || ""}
+          language={openFiles.find(f => f.id === activeFileId)?.path.split('.').pop() || 'javascript'}
+          fileName={openFiles.find(f => f.id === activeFileId)?.path}
+          cursorPosition={cursorPosition}
+          selectedText={selectedText}
+          onCodeInsert={(code) => {
+            const currentContent = currentCode || openFiles.find(f => f.id === activeFileId)?.content || "";
+            const beforeCursor = currentContent.slice(0, cursorPosition);
+            const afterCursor = currentContent.slice(cursorPosition);
+            setCurrentCode(beforeCursor + code + afterCursor);
+          }}
+          onCodeReplace={(code) => {
+            if (selectedText) {
+              const currentContent = currentCode || openFiles.find(f => f.id === activeFileId)?.content || "";
+              const newContent = currentContent.replace(selectedText, code);
+              setCurrentCode(newContent);
+              setSelectedText("");
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
