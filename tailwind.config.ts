@@ -61,7 +61,7 @@ export default {
           border: "var(--sidebar-border)",
           ring: "var(--sidebar-ring)",
         },
-        // Custom CodeTab colors
+        // Custom GitHV colors
         'github-blue': "var(--github-blue)",
         'dark-bg': "var(--dark-bg)",
         'dark-surface': "var(--dark-surface)",

@@ -12,7 +12,7 @@ export default function Landing() {
             <div className="text-github-blue text-xl">
               <Code className="h-8 w-8" />
             </div>
-            <span className="font-bold text-xl text-dark-text">CodeTab</span>
+            <span className="font-bold text-xl text-dark-text">GitHV</span>
           </div>
           <Button
             onClick={() => window.location.href = "/api/login"}
@@ -30,7 +30,7 @@ export default function Landing() {
           <h1 className="text-5xl md:text-7xl font-bold text-dark-text mb-6">
             Code on the go with{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-github-blue to-blue-400">
-              CodeTab
+              GitHV
             </span>
           </h1>
           <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
@@ -165,7 +165,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t border-dark-border bg-dark-surface/50">
         <div className="container mx-auto px-4 py-8 text-center text-gray-400">
-          <p>&copy; 2024 CodeTab. Built for mobile developers.</p>
+          <p>&copy; 2024 GitHV. Built for mobile developers.</p>
         </div>
       </footer>
     </div>

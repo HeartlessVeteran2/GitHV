@@ -14,7 +14,7 @@ export default function Terminal() {
   const [output, setOutput] = useState<TerminalOutput[]>([
     {
       id: "1",
-      text: "johndoe@codetab:~/my-awesome-project$ npm start",
+      text: "johndoe@githv:~/my-awesome-project$ npm start",
       type: "command"
     },
     {
@@ -50,7 +50,7 @@ export default function Terminal() {
     // Add the command to output
     newOutput.push({
       id: Date.now().toString(),
-      text: `johndoe@codetab:~/my-awesome-project$ ${command}`,
+      text: `johndoe@githv:~/my-awesome-project$ ${command}`,
       type: "command"
     });
 
@@ -160,7 +160,7 @@ export default function Terminal() {
               ))}
             </ScrollArea>
             <div className="flex items-center mt-2">
-              <span className="text-gray-400">johndoe@codetab:~/my-awesome-project$</span>
+              <span className="text-gray-400">johndoe@githv:~/my-awesome-project$</span>
               <input
                 type="text"
                 value={currentCommand}

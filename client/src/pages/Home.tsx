@@ -41,7 +41,7 @@ export default function Home() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  const { data: repositories = [] } = useQuery({
+  const { data: repositories = [] } = useQuery<Repository[]>({
     queryKey: ["/api/repositories"],
     enabled: isAuthenticated,
     retry: false,

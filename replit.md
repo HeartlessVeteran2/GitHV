@@ -1,6 +1,6 @@
 # Overview
 
-CodeTab is a tablet-optimized web-based code editor and development environment with GitHub integration. It enables developers to edit repositories, manage files, and work on projects from tablets and other mobile devices. The application provides a full-featured IDE experience with syntax highlighting, file management, terminal access, and Git operations, all optimized for touch interfaces.
+GitHV is a tablet-optimized web-based code editor and development environment with GitHub integration. It enables developers to edit repositories, manage files, and work on projects from tablets and other mobile devices. The application provides a full-featured IDE experience with syntax highlighting, file management, terminal access, and Git operations, all optimized for touch interfaces.
 
 # User Preferences
 

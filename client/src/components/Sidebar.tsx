@@ -26,7 +26,7 @@ interface SidebarProps {
 export default function Sidebar({ currentRepository, onFileSelect, selectedFileId }: SidebarProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
-  const { data: files = [] } = useQuery({
+  const { data: files = [] } = useQuery<FileType[]>({
     queryKey: ["/api/repositories", currentRepository?.id, "files"],
     enabled: !!currentRepository,
   });

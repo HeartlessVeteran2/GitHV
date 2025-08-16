@@ -2,6 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Menu, CloudUpload, RefreshCw } from "lucide-react";
+import type { User } from "@shared/schema";
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -10,7 +11,7 @@ interface HeaderProps {
 }
 
 export default function Header({ onToggleSidebar, onPush, onSync }: HeaderProps) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useAuth() as { user: User | undefined; isLoading: boolean };
 
   return (
     <header className="bg-dark-surface border-b border-dark-border px-4 py-3 flex items-center justify-between">
@@ -29,7 +30,7 @@ export default function Header({ onToggleSidebar, onPush, onSync }: HeaderProps)
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
             </svg>
           </div>
-          <span className="font-semibold text-lg">CodeTab</span>
+          <span className="font-semibold text-lg">GitHV</span>
         </div>
       </div>
       
