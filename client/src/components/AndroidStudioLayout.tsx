@@ -18,6 +18,7 @@ import {
   Bot, Brain, Sparkles, Monitor, Sun, Moon, MoreHorizontal
 } from "lucide-react";
 import FloatingAIAssistant from "./FloatingAIAssistant";
+import MonacoEditor from "./MonacoEditor";
 import type { Repository, File as FileType } from "@shared/schema";
 
 interface AndroidStudioLayoutProps {
@@ -48,6 +49,33 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
       return;
     }
   }, [isAuthenticated, isLoading, onLogin]);
+
+  // Handle Monaco editor events
+  useEffect(() => {
+    const handleSave = () => {
+      const activeFile = openFiles.find(f => f.id === activeFileId);
+      if (activeFile && currentCode !== undefined) {
+        // Save file logic here
+        console.log('Saving file:', activeFile.path);
+      }
+    };
+
+    const handleRun = () => {
+      console.log('Running code...');
+      toast({
+        title: "Running Code",
+        description: "Code execution started",
+      });
+    };
+
+    window.addEventListener('monaco-save', handleSave);
+    window.addEventListener('monaco-run', handleRun);
+
+    return () => {
+      window.removeEventListener('monaco-save', handleSave);
+      window.removeEventListener('monaco-run', handleRun);
+    };
+  }, [activeFileId, currentCode, openFiles, toast]);
 
   const { data: repositories = [] } = useQuery<Repository[]>({
     queryKey: ["/api/repositories"],
@@ -395,32 +423,34 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
                   )}
 
                   {/* Editor Content */}
-                  <div className="flex-1 p-4 relative">
+                  <div className="flex-1 relative">
                     {activeFileId ? (
-                      <div className="h-full">
-                        <div className="bg-black rounded-lg p-4 h-full font-mono text-sm">
-                          <textarea
-                            className="w-full h-full bg-transparent text-green-400 resize-none outline-none"
-                            value={currentCode || openFiles.find(f => f.id === activeFileId)?.content || '// Loading...'}
-                            onChange={(e) => {
-                              setCurrentCode(e.target.value);
-                              setCursorPosition(e.target.selectionStart);
-                            }}
-                            onSelect={(e) => {
-                              const target = e.target as HTMLTextAreaElement;
-                              setCursorPosition(target.selectionStart);
-                              setSelectedText(target.value.substring(target.selectionStart, target.selectionEnd));
-                            }}
-                            placeholder="Start typing your code..."
-                          />
-                        </div>
-                      </div>
+                      <MonacoEditor
+                        value={currentCode || openFiles.find(f => f.id === activeFileId)?.content || '// Welcome to GitHV IDE\n// Start coding...'}
+                        language={openFiles.find(f => f.id === activeFileId)?.path.split('.').pop()?.toLowerCase() || 'javascript'}
+                        theme={theme === 'dark' ? 'vs-dark' : 'vs-light'}
+                        onChange={(value) => setCurrentCode(value)}
+                        onCursorPositionChange={setCursorPosition}
+                        onSelectionChange={setSelectedText}
+                        height="100%"
+                        width="100%"
+                      />
                     ) : (
                       <div className="flex items-center justify-center h-full text-gray-400">
                         <div className="text-center">
                           <Code className="h-16 w-16 mx-auto mb-4 opacity-50" />
                           <p className="text-lg">Welcome to GitHV IDE</p>
                           <p className="text-sm">Open a file to start coding</p>
+                          <div className="mt-6 space-y-2">
+                            <Button
+                              onClick={() => syncRepositoriesMutation.mutate()}
+                              disabled={syncRepositoriesMutation.isPending}
+                              className="mr-2"
+                            >
+                              <GitBranch className="h-4 w-4 mr-2" />
+                              Sync Repositories
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     )}
