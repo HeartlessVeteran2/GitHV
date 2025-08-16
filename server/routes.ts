@@ -266,6 +266,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced Copilot features
+  app.post("/api/ai/code-suggestions", isAuthenticated, async (req, res) => {
+    try {
+      const { code, language, fileName, cursorPosition, selectedText } = req.body;
+      
+      const suggestions = [];
+      
+      // Generate code completion suggestion
+      if (code.trim()) {
+        try {
+          const completion = await generateCodeCompletion(code, language, `File: ${fileName}\nCursor at position: ${cursorPosition}\nSelected text: ${selectedText}`);
+          if (completion) {
+            suggestions.push({
+              id: `completion-${Date.now()}`,
+              type: 'completion',
+              title: 'Code Completion',
+              description: 'AI-suggested code completion',
+              code: completion,
+              confidence: 0.85
+            });
+          }
+        } catch (error) {
+          console.error("Completion suggestion error:", error);
+        }
+
+        // Generate refactoring suggestion
+        try {
+          const refactored = await refactorCode(code, language, 'improve readability and performance');
+          if (refactored && refactored !== code) {
+            suggestions.push({
+              id: `refactor-${Date.now()}`,
+              type: 'refactor',
+              title: 'Code Refactoring',
+              description: 'Improve code structure and readability',
+              code: refactored,
+              confidence: 0.75
+            });
+          }
+        } catch (error) {
+          console.error("Refactor suggestion error:", error);
+        }
+
+        // Analyze for potential issues
+        try {
+          const analysis = await analyzeCode(code, language);
+          if (analysis.issues && analysis.issues.length > 0) {
+            suggestions.push({
+              id: `fix-${Date.now()}`,
+              type: 'fix',
+              title: 'Bug Fix',
+              description: `Found ${analysis.issues.length} potential issues`,
+              code: `// Issues found:\n${analysis.issues.map((issue: string) => `// - ${issue}`).join('\n')}\n\n${code}`,
+              confidence: 0.70
+            });
+          }
+        } catch (error) {
+          console.error("Analysis suggestion error:", error);
+        }
+      }
+      
+      res.json({ suggestions });
+    } catch (error) {
+      console.error("Code suggestions error:", error);
+      res.status(500).json({ error: "Failed to generate code suggestions" });
+    }
+  });
+
+  app.post("/api/ai/chat", isAuthenticated, async (req, res) => {
+    try {
+      const { message, code, language, fileName, history } = req.body;
+      
+      const context = `
+You are an expert programming assistant. The user is working on a ${language} file named ${fileName || 'untitled'}.
+
+Current code:
+\`\`\`${language}
+${code}
+\`\`\`
+
+Chat history:
+${history.map((msg: any) => `${msg.role}: ${msg.content}`).join('\n')}
+
+User question: ${message}
+
+Provide a helpful, accurate response about the code or programming question.
+`;
+      
+      const response = await explainCode(context, language);
+      res.json({ response });
+    } catch (error) {
+      console.error("AI chat error:", error);
+      res.status(500).json({ error: "Failed to process chat message" });
+    }
+  });
+
   app.post("/api/ai/refactor-code", isAuthenticated, async (req, res) => {
     try {
       const { code, language, instructions } = req.body;

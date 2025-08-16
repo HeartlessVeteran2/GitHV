@@ -8,6 +8,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import MobileCodeEditor from "@/components/MobileCodeEditor";
 import AIPoweredCodeEditor from "@/components/AIPoweredCodeEditor";
 import SimpleGitHubDashboard from "@/components/SimpleGitHubDashboard";
+import CopilotAssistant from "@/components/CopilotAssistant";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,6 +35,7 @@ export default function MobileHome() {
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [aiMode, setAiMode] = useState(false);
+  const [copilotMode, setCopilotMode] = useState(true);
   const [deviceMode, setDeviceMode] = useState<'phone' | 'tablet' | 'desktop'>('tablet');
 
   // Auto-detect device mode
@@ -294,8 +296,17 @@ export default function MobileHome() {
                     <Button
                       size="sm"
                       variant="outline"
+                      onClick={() => setCopilotMode(!copilotMode)}
+                      className={copilotMode ? "bg-blue-600 text-white" : ""}
+                    >
+                      <Brain className="h-3 w-3 mr-1" />
+                      Copilot
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
                       onClick={() => setAiMode(!aiMode)}
-                      className={aiMode ? "bg-blue-600" : ""}
+                      className={aiMode ? "bg-purple-600 text-white" : ""}
                     >
                       <Sparkles className="h-3 w-3 mr-1" />
                       AI Mode
@@ -307,10 +318,6 @@ export default function MobileHome() {
                     <Button size="sm" variant="outline">
                       <Search className="h-3 w-3 mr-1" />
                       Search
-                    </Button>
-                    <Button size="sm" variant="outline">
-                      <Settings className="h-3 w-3 mr-1" />
-                      Settings
                     </Button>
                   </div>
                 </div>
@@ -335,9 +342,15 @@ export default function MobileHome() {
         </div>
 
         <div className="flex items-center space-x-2">
-          {aiMode && (
+          {copilotMode && (
             <Badge className="bg-blue-600">
               <Brain className="h-3 w-3 mr-1" />
+              Copilot
+            </Badge>
+          )}
+          {aiMode && (
+            <Badge className="bg-purple-600">
+              <Sparkles className="h-3 w-3 mr-1" />
               AI
             </Badge>
           )}
@@ -474,8 +487,25 @@ export default function MobileHome() {
               )}
             </div>
 
+            {/* Copilot Assistant Panel */}
+            {copilotMode && activeFile && (
+              <CopilotAssistant
+                code={activeFile.content || ""}
+                language={activeFile.path.split('.').pop() || 'javascript'}
+                fileName={activeFile.path}
+                onCodeChange={(content) => handleFileChange(activeFile.id, content)}
+                onInsertCode={(code, position) => {
+                  const currentContent = activeFile.content || "";
+                  const newContent = position !== undefined 
+                    ? currentContent.slice(0, position) + code + currentContent.slice(position)
+                    : currentContent + "\n" + code;
+                  handleFileChange(activeFile.id, newContent);
+                }}
+              />
+            )}
+
             {/* Side Panel for GitHub/Terminal */}
-            {deviceMode === 'desktop' && currentRepository && (
+            {deviceMode === 'desktop' && !copilotMode && currentRepository && (
               <div className="w-96 border-l border-dark-border">
                 <SimpleGitHubDashboard
                   owner={currentRepository.fullName.split('/')[0]}
