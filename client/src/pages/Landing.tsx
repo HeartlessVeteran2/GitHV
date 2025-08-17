@@ -28,14 +28,14 @@ export default function Landing() {
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-7xl font-bold text-dark-text mb-6">
-            Code on the go with{" "}
+            Your Personal{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-github-blue to-blue-400">
-              GitHV
+              GitHV IDE
             </span>
           </h1>
           <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-            A tablet-optimized coding environment with GitHub integration. 
-            Edit your repositories, write code, and manage projects from anywhere.
+            A private, tablet-optimized development environment with AI assistance. 
+            Code, edit, and develop projects with professional tools optimized for touch.
           </p>
           <Button
             size="lg"
@@ -52,11 +52,11 @@ export default function Landing() {
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-dark-text mb-4">
-            Everything you need to code on mobile
+            Personal Development Environment
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Built specifically for tablet and mobile development with touch-friendly 
-            interface and professional coding features.
+            Your private coding workspace with professional IDE features, 
+            AI assistance, and mobile-optimized interface for development anywhere.
           </p>
         </div>
 
@@ -145,11 +145,11 @@ export default function Landing() {
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-dark-text mb-6">
-            Ready to start coding on your tablet?
+            Ready to start your personal coding environment?
           </h2>
           <p className="text-gray-400 text-lg mb-8">
-            Sign in with your GitHub account and start editing your repositories 
-            in seconds.
+            Sign in to access your private development workspace with AI assistance, 
+            professional editing tools, and mobile-optimized interface.
           </p>
           <Button
             size="lg"
@@ -165,7 +165,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t border-dark-border bg-dark-surface/50">
         <div className="container mx-auto px-4 py-8 text-center text-gray-400">
-          <p>&copy; 2024 GitHV. Built for mobile developers.</p>
+          <p>&copy; 2025 GitHV. Your Personal Development Environment.</p>
         </div>
       </footer>
     </div>

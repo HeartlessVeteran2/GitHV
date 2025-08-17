@@ -1,6 +1,6 @@
 # Overview
 
-GitHV is a comprehensive tablet-optimized web-based IDE that serves as a superior alternative to traditional codespaces for tablets and mobile devices. The application integrates with GitHub and provides extensive development tools including Gemini 2.5 Pro AI-powered code completion, real-time collaboration, advanced Git integration, voice commands, performance monitoring, and mobile-first touch interactions. It delivers a full-featured development experience with syntax highlighting, file management, terminal access, and Git operations, all optimized for touch interfaces across phones, tablets, and desktops.
+GitHV is a comprehensive tablet-optimized web-based IDE designed as a personal development environment. This private coding workspace provides extensive development tools including Gemini 2.5 Pro AI-powered code assistance, real-time collaboration, advanced Git integration, floating AI assistant, and mobile-first touch interactions. It delivers a full-featured development experience with syntax highlighting, file management, terminal access, and professional IDE features, all optimized for touch interfaces across phones, tablets, and desktops as a personal workspace.
 
 ## Recent Major Updates (January 16, 2025)
 
@@ -66,6 +66,7 @@ GitHV is a comprehensive tablet-optimized web-based IDE that serves as a superio
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+App Purpose: Personal development environment - not for public sharing or distribution.
 
 # System Architecture
 
