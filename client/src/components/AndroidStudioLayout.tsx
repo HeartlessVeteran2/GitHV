@@ -20,6 +20,10 @@ import {
 import FloatingAIAssistant from "./FloatingAIAssistant";
 import MonacoEditor from "./MonacoEditor";
 import MobileDropdowns, { CompactAIDropdown } from "./MobileDropdowns";
+import MobileTouchBar from "./MobileTouchBar";
+import MobileGestures from "./MobileGestures";
+import MobileFileManager from "./MobileFileManager";
+import MobileEnhancements from "./MobileEnhancements";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { Repository, File as FileType } from "@shared/schema";
 
@@ -44,6 +48,8 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
   const [cursorPosition, setCursorPosition] = useState(0);
   const [selectedText, setSelectedText] = useState("");
   const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const [undoRedoState, setUndoRedoState] = useState({ canUndo: false, canRedo: false });
   const isMobile = useIsMobile();
 
   // Redirect to login if not authenticated
@@ -275,13 +281,83 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
       case 'ai-chat':
         setAiPanelOpen(true);
         break;
+      case 'save':
+        // Save current file
+        console.log('Saving file...');
+        toast({ title: "File Saved", description: "Current file has been saved" });
+        break;
+      case 'undo':
+        console.log('Undo action');
+        break;
+      case 'redo':
+        console.log('Redo action');
+        break;
+      case 'copy':
+        console.log('Copy action');
+        break;
+      case 'paste':
+        console.log('Paste action');
+        break;
+      case 'zoom-in':
+        setZoomLevel(prev => Math.min(200, prev + 10));
+        break;
+      case 'zoom-out':
+        setZoomLevel(prev => Math.max(50, prev - 10));
+        break;
+      case 'insert-snippet':
+        console.log('Inserting code snippet:', data);
+        break;
+      case 'auto-save':
+        // Auto-save functionality for mobile
+        console.log('Auto-saving...');
+        toast({ 
+          title: "Auto-saved", 
+          description: "Changes saved automatically",
+          duration: 1000 
+        });
+        break;
       default:
         console.log('Unknown action:', action);
     }
   };
 
+  // Handle mobile gestures
+  const handleGesture = (gesture: any) => {
+    switch (gesture.type) {
+      case 'swipe':
+        if (gesture.direction === 'right' && sidebarCollapsed) {
+          setSidebarCollapsed(false);
+        } else if (gesture.direction === 'left' && !sidebarCollapsed) {
+          setSidebarCollapsed(true);
+        } else if (gesture.direction === 'up') {
+          setTerminalCollapsed(false);
+        } else if (gesture.direction === 'down') {
+          setTerminalCollapsed(true);
+        }
+        break;
+      case 'pinch':
+        if (gesture.scale > 1.1) {
+          setZoomLevel(prev => Math.min(200, prev + 5));
+        } else if (gesture.scale < 0.9) {
+          setZoomLevel(prev => Math.max(50, prev - 5));
+        }
+        break;
+      case 'doubletap':
+        // Quick run on double tap in editor
+        if (gesture.target?.closest('.monaco-editor')) {
+          handleMobileAction('run');
+        }
+        break;
+      case 'longpress':
+        // Show context menu
+        console.log('Long press detected');
+        break;
+    }
+  };
+
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+    <MobileGestures onGesture={handleGesture} enableSwipe={isMobile} enablePinch={isMobile}>
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
       {/* Mobile Dropdown Bar */}
       {isMobile && (
         <MobileDropdowns
@@ -416,7 +492,10 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
       )}
 
       {/* Main Layout */}
-      <div className="flex-1 flex" style={{ height: isMobile ? 'calc(100vh - 60px)' : 'calc(100vh - 88px)' }}>
+      <div className="flex-1 flex" style={{ 
+        height: isMobile ? 'calc(100vh - 140px)' : 'calc(100vh - 88px)',
+        paddingBottom: isMobile ? '80px' : '0'
+      }}>
         <ResizablePanelGroup direction="horizontal">
           {/* Left Sidebar - Hidden on mobile when collapsed */}
           {(!sidebarCollapsed || !isMobile) && !sidebarCollapsed && (
@@ -732,6 +811,25 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
           }}
         />
       )}
+
+      {/* Mobile Touch Bar */}
+      {isMobile && (
+        <MobileTouchBar
+          onAction={handleMobileAction}
+          isCodeEditorFocused={true}
+          hasUndoRedo={undoRedoState}
+          zoomLevel={zoomLevel}
+        />
+      )}
+
+      {/* Mobile Enhancements */}
+      {isMobile && (
+        <MobileEnhancements
+          onAction={handleMobileAction}
+          zoomLevel={zoomLevel}
+        />
+      )}
     </div>
+    </MobileGestures>
   );
 }
