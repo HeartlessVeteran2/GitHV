@@ -12,6 +12,8 @@ import {
   Send, Minimize2, Maximize2, Copy, Check, Settings
 } from "lucide-react";
 import PersonalitySelector, { personalities, type AIPersonality } from "./PersonalitySelector";
+import AITips from "./AITips";
+import AITooltip, { useAITooltips } from "./AITooltip";
 
 interface FloatingAIAssistantProps {
   code: string;
@@ -60,6 +62,9 @@ export default function FloatingAIAssistant({
   const [copiedSuggestion, setCopiedSuggestion] = useState<string | null>(null);
   const [currentPersonality, setCurrentPersonality] = useState<AIPersonality>(personalities[0]);
   const [showPersonalitySelector, setShowPersonalitySelector] = useState(false);
+  const [showTips, setShowTips] = useState(false);
+  const [hasShownWelcome, setHasShownWelcome] = useState(false);
+  const { tooltips, showTooltip, hideTooltip, hideAllTooltips } = useAITooltips();
   const chatEndRef = useRef<HTMLDivElement>(null);
   const assistantRef = useRef<HTMLDivElement>(null);
 
@@ -81,6 +86,11 @@ export default function FloatingAIAssistant({
       if (data.suggestions?.length > 0 && !isOpen) {
         setIsOpen(true);
         setActiveTab('suggestions');
+        // Show tooltip for first-time users
+        setTimeout(() => {
+          const suggestionElement = document.querySelector('.suggestion-item');
+          showContextTooltip('first-suggestion', suggestionElement as HTMLElement);
+        }, 500);
       }
     }
   });
@@ -151,6 +161,61 @@ export default function FloatingAIAssistant({
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [chatMessages]);
+
+  // Show welcome tips on first use
+  useEffect(() => {
+    const hasSeenWelcome = localStorage.getItem('ai-assistant-welcome');
+    if (!hasSeenWelcome && isOpen && !hasShownWelcome) {
+      setShowTips(true);
+      setHasShownWelcome(true);
+      localStorage.setItem('ai-assistant-welcome', 'true');
+    }
+  }, [isOpen, hasShownWelcome]);
+
+  // Show contextual tooltips based on user actions
+  const showContextTooltip = (type: string, element?: HTMLElement) => {
+    if (!element) return;
+    
+    const rect = element.getBoundingClientRect();
+    const position = {
+      x: rect.left + rect.width / 2,
+      y: rect.top,
+      placement: 'top' as const
+    };
+
+    const tooltipData = {
+      'first-suggestion': {
+        id: 'first-suggestion',
+        position,
+        title: 'AI Suggestion Available',
+        content: 'Your AI assistant has analyzed your code and found helpful suggestions. Click on any suggestion to learn more or apply it.',
+        type: 'tip' as const,
+        duration: 5000
+      },
+      'personality-changed': {
+        id: 'personality-changed',
+        position,
+        title: 'Personality Updated',
+        content: 'Your AI assistant personality has been changed. You\'ll notice different communication styles and approaches.',
+        type: 'success' as const,
+        duration: 3000
+      },
+      'no-suggestions': {
+        id: 'no-suggestions',
+        position,
+        title: 'Need Help?',
+        content: 'Try using the quick action buttons to get specific suggestions, or switch to chat mode to ask questions.',
+        type: 'info' as const,
+        actionText: 'Show Tips',
+        onAction: () => setShowTips(true)
+      }
+    };
+
+    const tooltip = tooltipData[type as keyof typeof tooltipData];
+    if (tooltip) {
+      showTooltip(tooltip);
+    }
+  };
 
   // Handle dragging
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -287,7 +352,7 @@ export default function FloatingAIAssistant({
     >
       {/* Header */}
       <div
-        className="flex items-center justify-between p-3 bg-gray-800 rounded-t-lg cursor-move border-b border-gray-700"
+        className="flex items-center justify-between p-3 bg-gray-800 rounded-t-lg cursor-move border-b border-gray-700 ai-assistant-header"
         onMouseDown={handleMouseDown}
       >
         <div className="flex items-center space-x-2">
@@ -459,12 +524,23 @@ export default function FloatingAIAssistant({
                             variant="outline"
                             className="text-xs h-8"
                             onClick={action.action}
+                            title={`Ask AI to ${action.label.toLowerCase()}`}
                           >
                             {action.icon}
                             <span className="ml-1 hidden sm:inline">{action.label}</span>
                           </Button>
                         ))}
                       </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-xs mt-3"
+                        onClick={() => setShowTips(true)}
+                        title="Show AI assistant tips and tutorials"
+                      >
+                        <Lightbulb className="h-3 w-3 mr-1" />
+                        Need Help?
+                      </Button>
                     </div>
                   )}
                 </ScrollArea>
@@ -561,10 +637,29 @@ export default function FloatingAIAssistant({
             content: `Hi! I'm your ${personality.name} assistant. ${personality.description} How can I help you with your code today?`,
             timestamp: new Date()
           }]);
+          // Show personality change tooltip
+          setTimeout(() => {
+            const headerElement = document.querySelector('.ai-assistant-header');
+            showContextTooltip('personality-changed', headerElement as HTMLElement);
+          }, 500);
         }}
         isOpen={showPersonalitySelector}
         onClose={() => setShowPersonalitySelector(false)}
       />
+
+      {/* AI Tips Modal */}
+      <AITips
+        isOpen={showTips}
+        onClose={() => setShowTips(false)}
+        onTipComplete={(tipId) => {
+          console.log(`Tip completed: ${tipId}`);
+        }}
+      />
+
+      {/* Active Tooltips */}
+      {tooltips.map((tooltip) => (
+        <AITooltip key={tooltip.id} {...tooltip} />
+      ))}
     </div>
   );
 }

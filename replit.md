@@ -2,9 +2,19 @@
 
 GitHV is a comprehensive tablet-optimized web-based IDE designed as a personal development environment. This private coding workspace provides extensive development tools including Gemini 2.5 Pro AI-powered code assistance, real-time collaboration, advanced Git integration, floating AI assistant, and mobile-first touch interactions. It delivers a full-featured development experience with syntax highlighting, file management, terminal access, and professional IDE features, all optimized for touch interfaces across phones, tablets, and desktops as a personal workspace.
 
-## Recent Major Updates (January 16, 2025)
+## Recent Major Updates (January 17, 2025)
 
-### Complete IDE Implementation (Latest Update)
+### User-Friendly AI Assistant Tips and Tooltips (Latest Update)
+- **Interactive Tips System**: Comprehensive tutorial system with 8+ categorized tips covering getting started, personalities, suggestions, chat, and advanced features
+- **Contextual Tooltips**: Smart contextual tooltips that appear based on user actions (first suggestions, personality changes, help requests)
+- **Welcome Experience**: Automatic welcome tips for first-time users with progress tracking and completion states
+- **Help Integration**: Built-in help buttons and tooltip triggers throughout the AI assistant interface
+- **Persistent Progress**: LocalStorage-based progress tracking to remember completed tips and user preferences
+- **Category-Based Learning**: Tips organized by functionality (Getting Started, Personalities, Suggestions, Chat, Advanced)
+- **Interactive Elements**: Hands-on examples and visual guides for personality selection and quick actions
+- **Accessibility Features**: Enhanced tooltips with proper titles, descriptions, and keyboard navigation support
+
+### Complete IDE Implementation (Previous Update)
 - **Monaco-Style Code Editor**: Professional code editor with syntax highlighting, line numbers, and keyboard shortcuts
 - **WebSocket Real-Time Collaboration**: Live code synchronization and cursor position sharing between users
 - **Enhanced File Management**: Complete file operations with auto-save functionality and version tracking
