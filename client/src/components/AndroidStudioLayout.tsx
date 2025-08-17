@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import FloatingAIAssistant from "./FloatingAIAssistant";
 import MonacoEditor from "./MonacoEditor";
+import MobileDropdowns, { CompactAIDropdown } from "./MobileDropdowns";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { Repository, File as FileType } from "@shared/schema";
 
 interface AndroidStudioLayoutProps {
@@ -41,6 +43,8 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
   const [currentCode, setCurrentCode] = useState("");
   const [cursorPosition, setCursorPosition] = useState(0);
   const [selectedText, setSelectedText] = useState("");
+  const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
+  const isMobile = useIsMobile();
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -212,10 +216,85 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
     );
   }
 
+  // Handle mobile dropdown actions
+  const handleMobileAction = (action: string, data?: any) => {
+    switch (action) {
+      case 'run':
+        console.log('Running code...');
+        toast({ title: "Running Code", description: "Code execution started" });
+        break;
+      case 'debug':
+        console.log('Debugging...');
+        toast({ title: "Debug Mode", description: "Debugging session started" });
+        break;
+      case 'test':
+        console.log('Running tests...');
+        toast({ title: "Running Tests", description: "Test execution started" });
+        break;
+      case 'git-sync':
+        console.log('Syncing with Git...');
+        toast({ title: "Git Sync", description: "Synchronizing changes" });
+        break;
+      case 'toggle-file-tree':
+        setSidebarCollapsed(!sidebarCollapsed);
+        break;
+      case 'toggle-terminal':
+        setTerminalCollapsed(!terminalCollapsed);
+        break;
+      case 'toggle-ai':
+        setAiPanelOpen(!aiPanelOpen);
+        break;
+      case 'theme':
+        setTheme(theme === 'light' ? 'dark' : 'light');
+        break;
+      case 'open-file':
+        if (data) {
+          const file = repositoryFiles.find(f => f.path === data);
+          if (file) openFile(file);
+        }
+        break;
+      case 'browse-files':
+        setSidebarCollapsed(false);
+        break;
+      case 'new-file':
+        console.log('Creating new file...');
+        break;
+      case 'search-files':
+        console.log('Searching files...');
+        break;
+      case 'filter-files':
+        console.log('Filtering files...');
+        break;
+      case 'ai-explain':
+      case 'ai-debug':
+      case 'ai-test':
+      case 'ai-optimize':
+        console.log(`AI action: ${action}`);
+        break;
+      case 'ai-show-suggestions':
+      case 'ai-chat':
+        setAiPanelOpen(true);
+        break;
+      default:
+        console.log('Unknown action:', action);
+    }
+  };
+
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
-      {/* Top Menu Bar */}
-      <div className="h-12 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4">
+      {/* Mobile Dropdown Bar */}
+      {isMobile && (
+        <MobileDropdowns
+          onAction={handleMobileAction}
+          currentFile={openFiles.find(f => f.id === activeFileId)?.path}
+          repositoryFiles={repositoryFiles}
+          isFileTreeOpen={!sidebarCollapsed}
+        />
+      )}
+      
+      {/* Desktop Top Menu Bar */}
+      {!isMobile && (
+        <div className="h-12 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <Code className="h-5 w-5 text-green-500" />
@@ -258,10 +337,12 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
             <LogOut className="h-4 w-4" />
           </Button>
         </div>
-      </div>
+        </div>
+      )}
 
-      {/* Toolbar */}
-      <div className="h-10 bg-gray-800 border-b border-gray-700 flex items-center px-4 space-x-2">
+      {/* Desktop Toolbar */}
+      {!isMobile && (
+        <div className="h-10 bg-gray-800 border-b border-gray-700 flex items-center px-4 space-x-2">
         <Button size="sm" variant="ghost" className="text-green-500">
           <Play className="h-4 w-4 mr-1" />
           Run
@@ -298,13 +379,47 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
           <Bot className="h-4 w-4 mr-1" />
           Copilot
         </Button>
-      </div>
+        </div>
+      )}
+      
+      {/* Mobile Toolbar - Compact AI Dropdown */}
+      {isMobile && (
+        <div className="h-10 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-2">
+          <div className="flex items-center space-x-2">
+            <CompactAIDropdown
+              onAction={handleMobileAction}
+              suggestions={aiSuggestions}
+              isActive={aiPanelOpen}
+            />
+            <Button size="sm" variant="ghost" className="text-green-500" title="Run code">
+              <Play className="h-4 w-4" />
+            </Button>
+            <Button size="sm" variant="ghost" title="Debug">
+              <Bug className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="flex items-center space-x-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              title="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun className="h-3 w-3" /> : <Moon className="h-3 w-3" />}
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => window.location.href = "/api/logout"} title="Logout">
+              <LogOut className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Main Layout */}
-      <div className="flex-1 flex" style={{ height: 'calc(100vh - 88px)' }}>
+      <div className="flex-1 flex" style={{ height: isMobile ? 'calc(100vh - 60px)' : 'calc(100vh - 88px)' }}>
         <ResizablePanelGroup direction="horizontal">
-          {/* Left Sidebar */}
-          {!sidebarCollapsed && (
+          {/* Left Sidebar - Hidden on mobile when collapsed */}
+          {(!sidebarCollapsed || !isMobile) && !sidebarCollapsed && (
             <>
               <ResizablePanel defaultSize={20} minSize={15} maxSize={40}>
                 <div className="h-full bg-gray-800 border-r border-gray-700">

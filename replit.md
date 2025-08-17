@@ -4,7 +4,17 @@ GitHV is a comprehensive tablet-optimized web-based IDE designed as a personal d
 
 ## Recent Major Updates (January 17, 2025)
 
-### User-Friendly AI Assistant Tips and Tooltips (Latest Update)
+### Mobile-Optimized Dropdown Menus (Latest Update)
+- **Space-Efficient Interface**: Mobile-first dropdown menus that save space on phone and tablet screens
+- **Comprehensive Mobile Toolbar**: Compact dropdown menus for main actions, file selection, view options, and file operations
+- **Contextual AI Dropdown**: Mobile-optimized AI assistant with suggestion badges and quick action access
+- **Responsive Layout**: Dynamic interface that adapts between desktop full menus and mobile compact dropdowns
+- **Touch-Friendly Controls**: Large touch targets and optimized button sizes for mobile interaction
+- **Smart File Selection**: Dropdown file selector with recent files and quick browse functionality
+- **Collapsible Panels**: Mobile-aware panel management that automatically adjusts sidebar and panel visibility
+- **Unified Mobile Experience**: Consistent dropdown pattern across all IDE functions for familiar mobile navigation
+
+### User-Friendly AI Assistant Tips and Tooltips (Previous Update)
 - **Interactive Tips System**: Comprehensive tutorial system with 8+ categorized tips covering getting started, personalities, suggestions, chat, and advanced features
 - **Contextual Tooltips**: Smart contextual tooltips that appear based on user actions (first suggestions, personality changes, help requests)
 - **Welcome Experience**: Automatic welcome tips for first-time users with progress tracking and completion states
