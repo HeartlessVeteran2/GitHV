@@ -13,7 +13,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import { Input } from "@/components/ui/input";
 import { 
   Menu, Code, GitBranch, Folder, Settings, User, Play, Square,
-  FileCode, Terminal, Search, RefreshCw, LogOut, Github,
+  FileCode, Terminal as TerminalIcon, Search, RefreshCw, LogOut, Github,
   ChevronRight, ChevronDown, File, Bug, TestTube, Zap,
   Bot, Brain, Sparkles, Monitor, Sun, Moon, MoreHorizontal
 } from "lucide-react";
@@ -24,6 +24,8 @@ import MobileTouchBar from "./MobileTouchBar";
 import MobileGestures from "./MobileGestures";
 import MobileFileManager from "./MobileFileManager";
 import MobileEnhancements from "./MobileEnhancements";
+import Terminal from "./Terminal";
+import GitIntegration from "./GitIntegration";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { Repository, File as FileType } from "@shared/schema";
 
@@ -659,25 +661,11 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
                 <>
                   <ResizableHandle />
                   <ResizablePanel defaultSize={30} minSize={20}>
-                    <div className="h-full bg-black border-t border-gray-700">
-                      <div className="h-8 bg-gray-800 border-b border-gray-700 flex items-center px-4 justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Terminal className="h-4 w-4" />
-                          <span className="text-sm">Terminal</span>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setTerminalCollapsed(true)}
-                        >
-                          <MoreHorizontal className="h-3 w-3" />
-                        </Button>
-                      </div>
-                      <div className="p-4 font-mono text-sm text-green-400">
-                        <div>$ Welcome to GitHV Terminal</div>
-                        <div className="text-gray-500">Ready for commands...</div>
-                      </div>
-                    </div>
+                    <Terminal 
+                      isOpen={!terminalCollapsed} 
+                      onClose={() => setTerminalCollapsed(true)}
+                      theme={theme}
+                    />
                   </ResizablePanel>
                 </>
               )}
