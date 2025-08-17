@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Bot, Sparkles, X, MessageSquare, Lightbulb, Code2,
-  Zap, TestTube, Bug, FileText, ChevronUp, ChevronDown,
+  Bot, Sparkles, X, MessageSquare, Lightbulb,
+  Zap, TestTube, Bug, FileText,
   Send, Minimize2, Maximize2, Copy, Check
 } from "lucide-react";
 
