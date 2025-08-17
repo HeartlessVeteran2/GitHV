@@ -13,10 +13,14 @@ import {
 } from "./gemini";
 import { GitHubService } from "./github";
 import { insertRepositorySchema, insertFileSchema } from "@shared/schema";
+import aiRoutes from "./routes/ai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+
+  // AI routes
+  app.use('/api/ai', aiRoutes);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {

@@ -9,8 +9,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Bot, Sparkles, X, MessageSquare, Lightbulb,
   Zap, TestTube, Bug, FileText,
-  Send, Minimize2, Maximize2, Copy, Check
+  Send, Minimize2, Maximize2, Copy, Check, Settings
 } from "lucide-react";
+import PersonalitySelector, { personalities, type AIPersonality } from "./PersonalitySelector";
 
 interface FloatingAIAssistantProps {
   code: string;
@@ -57,6 +58,8 @@ export default function FloatingAIAssistant({
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [copiedSuggestion, setCopiedSuggestion] = useState<string | null>(null);
+  const [currentPersonality, setCurrentPersonality] = useState<AIPersonality>(personalities[0]);
+  const [showPersonalitySelector, setShowPersonalitySelector] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const assistantRef = useRef<HTMLDivElement>(null);
 
@@ -68,7 +71,8 @@ export default function FloatingAIAssistant({
         language,
         fileName,
         cursorPosition,
-        selectedText
+        selectedText,
+        personality: currentPersonality.prompt
       });
       return response as { suggestions: Suggestion[] };
     },
@@ -89,7 +93,8 @@ export default function FloatingAIAssistant({
         code,
         language,
         fileName,
-        history: chatMessages
+        history: chatMessages,
+        personality: currentPersonality.prompt
       });
       return response as { response: string };
     },
@@ -286,15 +291,28 @@ export default function FloatingAIAssistant({
         onMouseDown={handleMouseDown}
       >
         <div className="flex items-center space-x-2">
-          <Bot className="h-4 w-4 text-blue-500" />
-          <span className="font-medium text-white text-sm">AI Assistant</span>
-          <Badge variant="outline" className="text-xs">
-            <Sparkles className="h-2 w-2 mr-1" />
-            Live
-          </Badge>
+          <div className={`p-1 rounded ${currentPersonality.color} text-white`}>
+            {currentPersonality.icon}
+          </div>
+          <div>
+            <span className="font-medium text-white text-sm">{currentPersonality.name}</span>
+            <Badge variant="outline" className="text-xs ml-2">
+              <Sparkles className="h-2 w-2 mr-1" />
+              Live
+            </Badge>
+          </div>
         </div>
         
         <div className="flex items-center space-x-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowPersonalitySelector(true)}
+            className="h-6 w-6 p-0"
+            title="Change personality"
+          >
+            <Settings className="h-3 w-3" />
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -530,6 +548,23 @@ export default function FloatingAIAssistant({
           </div>
         </>
       )}
+
+      {/* Personality Selector Modal */}
+      <PersonalitySelector
+        currentPersonality={currentPersonality.id}
+        onPersonalityChange={(personality) => {
+          setCurrentPersonality(personality);
+          setShowPersonalitySelector(false);
+          // Add a welcome message from the new personality
+          setChatMessages(prev => [...prev, {
+            role: 'assistant',
+            content: `Hi! I'm your ${personality.name} assistant. ${personality.description} How can I help you with your code today?`,
+            timestamp: new Date()
+          }]);
+        }}
+        isOpen={showPersonalitySelector}
+        onClose={() => setShowPersonalitySelector(false)}
+      />
     </div>
   );
 }
