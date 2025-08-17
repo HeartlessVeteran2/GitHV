@@ -30,6 +30,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // GitHub OAuth integration
+  app.get('/api/auth/github', isAuthenticated, async (req: any, res) => {
+    const githubAuthUrl = `https://github.com/login/oauth/authorize?` +
+      `client_id=${process.env.GITHUB_CLIENT_ID}&` +
+      `redirect_uri=${encodeURIComponent(`${req.protocol}://${req.hostname}/api/auth/github/callback`)}&` +
+      `scope=repo,user:email,read:org`;
+    res.redirect(githubAuthUrl);
+  });
+
+  app.get('/api/auth/github/callback', isAuthenticated, async (req: any, res) => {
+    try {
+      const { code } = req.query;
+      if (!code) {
+        return res.redirect('/?error=github_auth_failed');
+      }
+
+      // Exchange code for access token
+      const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          client_id: process.env.GITHUB_CLIENT_ID,
+          client_secret: process.env.GITHUB_CLIENT_SECRET,
+          code,
+        }),
+      });
+
+      const tokenData = await tokenResponse.json();
+      
+      if (tokenData.access_token) {
+        // Update user with GitHub access token
+        const userId = req.user.claims.sub;
+        await storage.updateUser(userId, { githubAccessToken: tokenData.access_token });
+        res.redirect('/?github_connected=true');
+      } else {
+        res.redirect('/?error=github_token_failed');
+      }
+    } catch (error) {
+      console.error('GitHub OAuth error:', error);
+      res.redirect('/?error=github_auth_error');
+    }
+  });
+
   // Repository routes
   app.get('/api/repositories', isAuthenticated, async (req: any, res) => {
     try {

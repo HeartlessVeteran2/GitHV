@@ -443,9 +443,16 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
                           <p className="text-sm">Open a file to start coding</p>
                           <div className="mt-6 space-y-2">
                             <Button
+                              onClick={() => window.location.href = '/api/auth/github'}
+                              className="mr-2 mb-2"
+                            >
+                              <Github className="h-4 w-4 mr-2" />
+                              Connect GitHub
+                            </Button>
+                            <Button
                               onClick={() => syncRepositoriesMutation.mutate()}
                               disabled={syncRepositoriesMutation.isPending}
-                              className="mr-2"
+                              variant="outline"
                             >
                               <GitBranch className="h-4 w-4 mr-2" />
                               Sync Repositories

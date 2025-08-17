@@ -70,7 +70,7 @@ export default function FloatingAIAssistant({
         cursorPosition,
         selectedText
       });
-      return response;
+      return response as { suggestions: Suggestion[] };
     },
     onSuccess: (data) => {
       setSuggestions(data.suggestions || []);
@@ -91,7 +91,7 @@ export default function FloatingAIAssistant({
         fileName,
         history: chatMessages
       });
-      return response;
+      return response as { response: string };
     },
     onSuccess: (data) => {
       setChatMessages(prev => [
