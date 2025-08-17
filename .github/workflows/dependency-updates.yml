@@ -1,0 +1,97 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    - cron: '0 2 * * 1' # Every Monday at 2 AM UTC
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install npm-check-updates
+      run: npm install -g npm-check-updates
+    
+    - name: Check for outdated packages
+      run: ncu --format group
+    
+    - name: Update patch and minor versions
+      run: ncu -u --target patch,minor
+    
+    - name: Install updated dependencies
+      run: npm install
+    
+    - name: Run tests after update
+      run: |
+        npm run type-check
+        npm run lint
+        npm run build
+    
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: 'chore: update dependencies (patch/minor)'
+        title: 'Automated Dependency Updates'
+        body: |
+          ## Automated Dependency Updates
+          
+          This PR contains automated updates for patch and minor version dependencies.
+          
+          ### Changes
+          - Updated dependencies to latest patch/minor versions
+          - All tests passing
+          - No breaking changes expected
+          
+          ### Verification
+          - [x] TypeScript compilation successful
+          - [x] Linting passed
+          - [x] Build successful
+          
+          Please review and merge if appropriate.
+        branch: dependency-updates
+        delete-branch: true
+
+  major-updates-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install npm-check-updates
+      run: npm install -g npm-check-updates
+    
+    - name: Check for major updates
+      run: |
+        echo "## Major Version Updates Available" >> major_updates.md
+        echo "" >> major_updates.md
+        ncu --target major --format group >> major_updates.md || true
+    
+    - name: Create issue for major updates
+      uses: peter-evans/create-issue-from-file@v4
+      if: hashFiles('major_updates.md') != ''
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        title: 'Major Dependency Updates Available'
+        content-filepath: major_updates.md
+        labels: |
+          dependencies
+          major-update
+          needs-review

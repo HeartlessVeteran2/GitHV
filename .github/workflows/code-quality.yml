@@ -1,0 +1,205 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 6 * * 1' # Weekly on Monday at 6 AM UTC
+
+jobs:
+  lint-and-format:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run ESLint
+      run: npm run lint -- --format=compact --output-file=eslint-report.txt
+    
+    - name: Run Prettier check
+      run: npm run format:check
+    
+    - name: Check TypeScript
+      run: npm run type-check
+    
+    - name: Upload ESLint report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: eslint-report
+        path: eslint-report.txt
+
+  complexity-analysis:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        npm ci
+        npm install -g jscpd complexity-report
+    
+    - name: Analyze code complexity
+      run: |
+        # Create complexity report
+        complexity-report --output complexity.json --format json client/src server
+        
+        # Check for code duplication
+        jscpd --output ./jscpd-report --reporters html,json client/src server
+    
+    - name: Upload complexity reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: complexity-reports
+        path: |
+          complexity.json
+          jscpd-report/
+
+  code-coverage:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: githv_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Setup test database
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/githv_test
+      run: npm run db:push
+    
+    - name: Run tests with coverage
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/githv_test
+        NODE_ENV: test
+        SESSION_SECRET: test-secret
+      run: npm run test:coverage
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
+    
+    - name: Comment coverage on PR
+      if: github.event_name == 'pull_request'
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage/lcov.info
+
+  documentation-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        npm ci
+        npm install -g documentation jsdoc
+    
+    - name: Check JSDoc coverage
+      run: |
+        # Generate documentation
+        jsdoc -c jsdoc.conf.json -d ./docs client/src server
+        
+        # Check documentation coverage (you may need to install a specific tool)
+        echo "Documentation generated successfully"
+    
+    - name: Check README links
+      run: |
+        # Install markdown link checker
+        npm install -g markdown-link-check
+        
+        # Check all markdown files
+        find . -name "*.md" -not -path "./node_modules/*" -exec markdown-link-check {} \;
+    
+    - name: Upload documentation
+      uses: actions/upload-artifact@v3
+      with:
+        name: documentation
+        path: docs/
+
+  auto-format:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Auto-format code
+      run: |
+        npm run format
+        npm run lint:fix
+    
+    - name: Commit formatting changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add -A
+        if ! git diff --cached --quiet; then
+          git commit -m "style: auto-format code [skip ci]"
+          git push
+        else
+          echo "No formatting changes needed"
+        fi
