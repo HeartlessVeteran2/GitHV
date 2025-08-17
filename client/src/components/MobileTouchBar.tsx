@@ -63,6 +63,7 @@ export default function MobileTouchBar({
     { icon: <ZoomOut className="h-4 w-4" />, label: "Zoom-", action: "zoom-out" },
     { icon: <Terminal className="h-4 w-4" />, label: "Terminal", action: "toggle-terminal" },
     { icon: <Code2 className="h-4 w-4" />, label: "AI", action: "toggle-ai" },
+    { icon: <Settings className="h-4 w-4" />, label: "Web Viewer", action: "toggle-web-viewer" },
   ];
 
   const quickInserts = [

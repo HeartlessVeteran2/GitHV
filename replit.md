@@ -1,8 +1,18 @@
 # Overview
 
-GitHV is a comprehensive tablet-optimized web-based IDE designed as a personal development environment. This private coding workspace provides extensive development tools including Gemini 2.5 Pro AI-powered code assistance, real-time collaboration, advanced Git integration, floating AI assistant, and mobile-first touch interactions. It delivers a full-featured development experience with syntax highlighting, file management, terminal access, and professional IDE features, all optimized for touch interfaces across phones, tablets, and desktops as a personal workspace.
+GitHV is a comprehensive tablet-optimized web-based IDE designed as a personal development environment. This private coding workspace provides extensive development tools including Gemini 2.5 Pro AI-powered code assistance, real-time collaboration, advanced Git integration, floating AI assistant, mobile-first touch interactions, and a dedicated browser-optimized web viewer for the code space. It delivers a full-featured development experience with syntax highlighting, file management, terminal access, professional IDE features, and resource-efficient web preview capabilities, all optimized for touch interfaces across phones, tablets, and desktops as a personal workspace.
 
 ## Recent Major Updates (January 17, 2025)
+
+### Browser-Dedicated Web Viewer Implementation (Latest Update)
+- **Resource-Optimized Web Viewer**: Lightweight embedded browser specifically for code space preview to minimize resource usage
+- **Device Emulation**: Built-in device presets (Desktop, Tablet, Mobile) with responsive viewport scaling
+- **Smart Navigation**: URL bar with security indicators, refresh controls, and home button for localhost:5000
+- **Dual View Modes**: Preview mode with iframe rendering and source code view for HTML inspection
+- **Developer Tools**: Copy source, external link opening, maximize/minimize controls, and loading indicators
+- **Touch-Optimized Controls**: Mobile-friendly interface with gesture support and compact button layout
+- **Security Features**: Secure iframe sandboxing with controlled permissions for safe web content display
+- **Performance Focus**: Optimized rendering with lazy loading and efficient scaling for different screen sizes
 
 ### Comprehensive Mobile/Tablet Optimization (Latest Update)
 - **Advanced Touch Bar**: Fixed bottom touch bar with expandable quick actions, code snippets, and contextual tools

@@ -26,6 +26,7 @@ import MobileFileManager from "./MobileFileManager";
 import MobileEnhancements from "./MobileEnhancements";
 import Terminal from "./Terminal";
 import GitIntegration from "./GitIntegration";
+import WebViewer from "./WebViewer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { Repository, File as FileType } from "@shared/schema";
 
@@ -43,6 +44,7 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [terminalCollapsed, setTerminalCollapsed] = useState(true);
+  const [webViewerOpen, setWebViewerOpen] = useState(false);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [aiPanelOpen, setAiPanelOpen] = useState(true);
@@ -249,6 +251,9 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
       case 'toggle-terminal':
         setTerminalCollapsed(!terminalCollapsed);
         break;
+      case 'toggle-web-viewer':
+        setWebViewerOpen(!webViewerOpen);
+        break;
       case 'toggle-ai':
         setAiPanelOpen(!aiPanelOpen);
         break;
@@ -437,6 +442,14 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
         <Button size="sm" variant="ghost">
           <TestTube className="h-4 w-4 mr-1" />
           Test
+        </Button>
+        <Button 
+          size="sm" 
+          variant="ghost"
+          onClick={() => setWebViewerOpen(!webViewerOpen)}
+        >
+          <Monitor className="h-4 w-4 mr-1" />
+          Web Viewer
         </Button>
         <div className="w-px h-6 bg-gray-600 mx-2" />
         <Button
@@ -671,6 +684,21 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
               )}
             </ResizablePanelGroup>
           </ResizablePanel>
+
+          {/* Web Viewer Panel */}
+          {webViewerOpen && (
+            <>
+              <ResizableHandle />
+              <ResizablePanel defaultSize={40} minSize={30} maxSize={60}>
+                <WebViewer 
+                  isOpen={webViewerOpen} 
+                  onClose={() => setWebViewerOpen(false)}
+                  initialUrl="http://localhost:5000"
+                  theme={theme}
+                />
+              </ResizablePanel>
+            </>
+          )}
 
           {/* AI Assistant Panel */}
           {aiPanelOpen && (
