@@ -19,11 +19,8 @@ import {
 } from "lucide-react";
 import FloatingAIAssistant from "./FloatingAIAssistant";
 import MonacoEditor from "./MonacoEditor";
-import MobileDropdowns, { CompactAIDropdown } from "./MobileDropdowns";
-import MobileTouchBar from "./MobileTouchBar";
-import MobileGestures from "./MobileGestures";
+import { CompactAIDropdown } from "./MobileDropdowns";
 import MobileFileManager from "./MobileFileManager";
-import MobileEnhancements from "./MobileEnhancements";
 import Terminal from "./Terminal";
 import GitIntegration from "./GitIntegration";
 import WebViewer from "./WebViewer";
@@ -317,66 +314,17 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
       case 'insert-snippet':
         console.log('Inserting code snippet:', data);
         break;
-      case 'auto-save':
-        // Auto-save functionality for mobile
-        console.log('Auto-saving...');
-        toast({ 
-          title: "Auto-saved", 
-          description: "Changes saved automatically",
-          duration: 1000 
-        });
-        break;
+
       default:
         console.log('Unknown action:', action);
     }
   };
 
-  // Handle mobile gestures
-  const handleGesture = (gesture: any) => {
-    switch (gesture.type) {
-      case 'swipe':
-        if (gesture.direction === 'right' && sidebarCollapsed) {
-          setSidebarCollapsed(false);
-        } else if (gesture.direction === 'left' && !sidebarCollapsed) {
-          setSidebarCollapsed(true);
-        } else if (gesture.direction === 'up') {
-          setTerminalCollapsed(false);
-        } else if (gesture.direction === 'down') {
-          setTerminalCollapsed(true);
-        }
-        break;
-      case 'pinch':
-        if (gesture.scale > 1.1) {
-          setZoomLevel(prev => Math.min(200, prev + 5));
-        } else if (gesture.scale < 0.9) {
-          setZoomLevel(prev => Math.max(50, prev - 5));
-        }
-        break;
-      case 'doubletap':
-        // Quick run on double tap in editor
-        if (gesture.target?.closest('.monaco-editor')) {
-          handleMobileAction('run');
-        }
-        break;
-      case 'longpress':
-        // Show context menu
-        console.log('Long press detected');
-        break;
-    }
-  };
+
 
   return (
-    <MobileGestures onGesture={handleGesture} enableSwipe={isMobile} enablePinch={isMobile}>
-      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
-      {/* Mobile Dropdown Bar */}
-      {isMobile && (
-        <MobileDropdowns
-          onAction={handleMobileAction}
-          currentFile={openFiles.find(f => f.id === activeFileId)?.path}
-          repositoryFiles={repositoryFiles}
-          isFileTreeOpen={!sidebarCollapsed}
-        />
-      )}
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+
       
       {/* Desktop Top Menu Bar */}
       {!isMobile && (
@@ -833,24 +781,6 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
         />
       )}
 
-      {/* Mobile Touch Bar */}
-      {isMobile && (
-        <MobileTouchBar
-          onAction={handleMobileAction}
-          isCodeEditorFocused={true}
-          hasUndoRedo={undoRedoState}
-          zoomLevel={zoomLevel}
-        />
-      )}
-
-      {/* Mobile Enhancements */}
-      {isMobile && (
-        <MobileEnhancements
-          onAction={handleMobileAction}
-          zoomLevel={zoomLevel}
-        />
-      )}
     </div>
-    </MobileGestures>
   );
 }

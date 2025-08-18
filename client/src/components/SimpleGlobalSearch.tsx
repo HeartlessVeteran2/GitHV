@@ -116,7 +116,7 @@ export default function SimpleGlobalSearch({
     }, 300);
 
     return () => clearTimeout(debounceTimer);
-  }, [searchTerm, searchType, allFiles, repositories, calculateScore]);
+  }, [searchTerm, searchType, allFiles, repositories]);
 
   // Reset when dialog opens/closes
   useEffect(() => {

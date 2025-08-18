@@ -5,9 +5,7 @@ import { performanceTracker } from '@/lib/performance';
 
 // Phone Layout Components
 import SimpleMobileDropdowns from './SimpleMobileDropdowns';
-import MobileTouchBar from './MobileTouchBar';
 import MobileFileManager from './MobileFileManager';
-import MobileEnhancements from './MobileEnhancements';
 
 // Tablet Layout Components  
 import AndroidStudioLayout from './AndroidStudioLayout';
@@ -143,21 +141,6 @@ export default function ResponsiveLayout({ children, onLogin }: ResponsiveLayout
             />
           </div>
 
-          {/* Mobile Enhancements Overlay */}
-          <MobileEnhancements
-            onAction={handleAction}
-            zoomLevel={layoutState.zoomLevel}
-          />
-        </div>
-
-        {/* Mobile Touch Bar */}
-        <div className="safe-area-bottom">
-          <MobileTouchBar
-            onAction={handleAction}
-            isCodeEditorFocused={true}
-            hasUndoRedo={{ canUndo: false, canRedo: false }}
-            zoomLevel={layoutState.zoomLevel}
-          />
         </div>
       </div>
     );
