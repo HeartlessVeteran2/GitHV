@@ -7,7 +7,7 @@ import type { File as FileType } from "@shared/schema";
 import CodeCompletion from "./CodeCompletion";
 import TouchToolbar from "./TouchToolbar";
 import CommandPalette from "./CommandPalette";
-import GlobalSearch from "./GlobalSearch";
+import SimpleGlobalSearch from "./SimpleGlobalSearch";
 import VoiceCommand from "./VoiceCommand";
 import CodeSnippets from "./CodeSnippets";
 import PerformanceMonitor from "./PerformanceMonitor";
@@ -447,7 +447,7 @@ export default function CodeEditor({
         onPreviewToggle={() => setIsPreviewVisible(!isPreviewVisible)}
       />
 
-      <GlobalSearch
+      <SimpleGlobalSearch
         isOpen={showGlobalSearch}
         onClose={() => setShowGlobalSearch(false)}
         onFileSelect={(file) => console.log('Selected file:', file)}

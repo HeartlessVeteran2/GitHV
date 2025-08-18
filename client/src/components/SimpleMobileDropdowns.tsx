@@ -61,8 +61,7 @@ export default function SimpleMobileDropdowns({
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-8" 
-              title="Quick Actions"
+              className="h-8"
             >
               <Menu className="h-3 w-3" />
               <ChevronDown className="h-2 w-2 ml-1" />
@@ -115,7 +114,6 @@ export default function SimpleMobileDropdowns({
           size="sm" 
           className="h-8" 
           onClick={() => onAction('save')}
-          title="Save"
         >
           <Save className="h-3 w-3" />
         </Button>
@@ -125,7 +123,6 @@ export default function SimpleMobileDropdowns({
           size="sm" 
           className="h-8" 
           onClick={() => onAction('toggle-file-tree')}
-          title="Toggle File Tree"
         >
           {isFileTreeOpen ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
         </Button>
@@ -186,7 +183,6 @@ export default function SimpleMobileDropdowns({
           setShowQuickMenu(false); 
           setShowFileSelector(false); 
         }}
-        title="Settings"
       >
         <Settings className="h-3 w-3" />
       </Button>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,19 +18,19 @@ interface SearchResult {
   score: number;
 }
 
-interface GlobalSearchProps {
+interface SimpleGlobalSearchProps {
   isOpen: boolean;
   onClose: () => void;
   onFileSelect: (file: FileType) => void;
   repositories: Repository[];
 }
 
-export default function GlobalSearch({ 
+export default function SimpleGlobalSearch({ 
   isOpen, 
   onClose, 
   onFileSelect, 
   repositories 
-}: GlobalSearchProps) {
+}: SimpleGlobalSearchProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -41,6 +41,28 @@ export default function GlobalSearch({
     enabled: isOpen && repositories.length > 0,
   });
 
+  const calculateScore = useCallback((text: string, term: string): number => {
+    const lowerText = text.toLowerCase();
+    const lowerTerm = term.toLowerCase();
+    
+    if (lowerText === lowerTerm) return 100;
+    if (lowerText.startsWith(lowerTerm)) return 90;
+    if (lowerText.includes(lowerTerm)) return 70;
+    
+    // Fuzzy matching score
+    let score = 0;
+    let termIndex = 0;
+    
+    for (let i = 0; i < lowerText.length && termIndex < lowerTerm.length; i++) {
+      if (lowerText[i] === lowerTerm[termIndex]) {
+        score += 10;
+        termIndex++;
+      }
+    }
+    
+    return termIndex === lowerTerm.length ? score : 0;
+  }, []);
+
   useEffect(() => {
     if (!searchTerm.trim()) {
       setSearchResults([]);
@@ -48,7 +70,7 @@ export default function GlobalSearch({
       return;
     }
 
-    const performSearch = () => {
+    const debounceTimer = setTimeout(() => {
       const results: SearchResult[] = [];
       const term = searchTerm.toLowerCase();
 
@@ -90,33 +112,20 @@ export default function GlobalSearch({
       // Sort by score (higher is better)
       results.sort((a, b) => b.score - a.score);
       setSearchResults(results.slice(0, 50)); // Limit results
-    };
+      setSelectedIndex(0);
+    }, 300);
 
-    const debounceTimer = setTimeout(performSearch, 300);
     return () => clearTimeout(debounceTimer);
-  }, [searchTerm, searchType, allFiles, repositories]);
+  }, [searchTerm, searchType, allFiles, repositories, calculateScore]);
 
-  const calculateScore = (text: string, term: string): number => {
-    const lowerText = text.toLowerCase();
-    const lowerTerm = term.toLowerCase();
-    
-    if (lowerText === lowerTerm) return 100;
-    if (lowerText.startsWith(lowerTerm)) return 90;
-    if (lowerText.includes(lowerTerm)) return 70;
-    
-    // Fuzzy matching score
-    let score = 0;
-    let termIndex = 0;
-    
-    for (let i = 0; i < lowerText.length && termIndex < lowerTerm.length; i++) {
-      if (lowerText[i] === lowerTerm[termIndex]) {
-        score += 10;
-        termIndex++;
-      }
+  // Reset when dialog opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchTerm("");
+      setSearchResults([]);
+      setSelectedIndex(0);
     }
-    
-    return termIndex === lowerTerm.length ? score : 0;
-  };
+  }, [isOpen]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     switch (e.key) {
@@ -165,14 +174,6 @@ export default function GlobalSearch({
     }
   };
 
-  useEffect(() => {
-    if (!isOpen) {
-      setSearchTerm("");
-      setSearchResults([]);
-      setSelectedIndex(0);
-    }
-  }, [isOpen]);
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-dark-surface border-dark-border max-w-3xl max-h-[80vh]">
@@ -210,63 +211,63 @@ export default function GlobalSearch({
             </Button>
           </div>
 
-          {/* Search Results */}
-          <ScrollArea className="max-h-96">
-            <div className="space-y-1">
-              {searchResults.map((result, index) => (
-                <Button
-                  key={result.id}
-                  variant="ghost"
-                  className={`w-full justify-start p-3 h-auto text-left ${
-                    index === selectedIndex ? "bg-dark-bg" : ""
-                  }`}
-                  onClick={() => handleResultSelect(result)}
-                >
-                  <div className="flex items-start space-x-3 w-full">
-                    {getResultIcon(result.type)}
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">
-                        {result.path}
-                      </div>
-                      {result.content && (
-                        <div className="text-xs text-gray-400 font-mono mt-1 truncate">
-                          {result.lineNumber && (
-                            <span className="text-yellow-400 mr-2">
-                              Line {result.lineNumber}:
-                            </span>
-                          )}
-                          {result.content}
-                        </div>
-                      )}
-                      <div className="text-xs text-gray-500 mt-1">
-                        {result.repository.name}
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant="outline" className="text-xs">
-                        {result.type}
-                      </Badge>
-                      <Badge variant="secondary" className="text-xs">
-                        {Math.round(result.score)}%
-                      </Badge>
-                    </div>
+          {/* Results */}
+          {searchTerm && (
+            <ScrollArea className="h-96">
+              <div className="space-y-1">
+                {searchResults.length === 0 ? (
+                  <div className="text-center py-8 text-gray-400">
+                    No results found for "{searchTerm}"
                   </div>
-                </Button>
-              ))}
-              
-              {searchTerm && searchResults.length === 0 && (
-                <div className="text-center py-8 text-gray-400">
-                  No results found for "{searchTerm}"
-                </div>
-              )}
-              
-              {!searchTerm && (
-                <div className="text-center py-8 text-gray-400">
-                  Start typing to search across all files and content
-                </div>
-              )}
+                ) : (
+                  searchResults.map((result, index) => (
+                    <div
+                      key={result.id}
+                      className={`p-3 rounded-md cursor-pointer transition-colors ${
+                        index === selectedIndex
+                          ? "bg-blue-600 text-white"
+                          : "hover:bg-dark-bg"
+                      }`}
+                      onClick={() => handleResultSelect(result)}
+                    >
+                      <div className="flex items-center space-x-3">
+                        {getResultIcon(result.type)}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-medium truncate">
+                              {result.path.split('/').pop()}
+                            </span>
+                            <Badge variant="secondary" className="text-xs">
+                              {result.repository.name}
+                            </Badge>
+                            {result.lineNumber && (
+                              <Badge variant="outline" className="text-xs">
+                                Line {result.lineNumber}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-400 truncate">
+                            {result.path}
+                          </div>
+                          {result.content && (
+                            <div className="text-sm mt-1 p-2 bg-dark-bg rounded font-mono">
+                              {result.content}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          )}
+
+          {searchTerm && searchResults.length > 0 && (
+            <div className="text-xs text-gray-400">
+              {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} • Use ↑↓ to navigate, Enter to select
             </div>
-          </ScrollArea>
+          )}
         </div>
       </DialogContent>
     </Dialog>
