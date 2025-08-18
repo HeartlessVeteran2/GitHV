@@ -4,19 +4,19 @@ import { Code, Github, Smartphone, Zap } from "lucide-react";
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-bg via-dark-surface to-dark-bg">
+    <div className="min-h-screen gradient-bg">
       {/* Header */}
-      <header className="border-b border-dark-border bg-dark-surface/50 backdrop-blur">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="text-github-blue text-xl">
-              <Code className="h-8 w-8" />
+      <header className="glass-dark border-b border-dark-border/50 sticky top-0 z-50 animate-fade-in">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center space-x-3 animate-slide-in">
+            <div className="p-2 rounded-lg glass shadow-glow">
+              <Code className="h-8 w-8 text-github-blue" />
             </div>
-            <span className="font-bold text-xl text-dark-text">GitHV</span>
+            <span className="font-bold text-2xl gradient-text">GitHV</span>
           </div>
           <Button
             onClick={() => window.location.href = "/api/login"}
-            className="bg-github-blue hover:bg-blue-600"
+            className="btn-primary hover-lift px-6 py-2 text-white font-medium rounded-lg shadow-soft"
           >
             <Github className="h-4 w-4 mr-2" />
             Sign in with GitHub
@@ -61,28 +61,28 @@ export default function Landing() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <Card className="bg-dark-surface border-dark-border">
-            <CardHeader>
-              <div className="h-12 w-12 bg-github-blue/10 rounded-lg flex items-center justify-center mb-4">
-                <Github className="h-6 w-6 text-github-blue" />
+          <Card className="card-enhanced hover-lift animate-fade-in">
+            <CardHeader className="p-6">
+              <div className="h-14 w-14 bg-gradient-to-br from-github-blue/20 to-github-blue/10 rounded-xl flex items-center justify-center mb-6 shadow-glow">
+                <Github className="h-7 w-7 text-github-blue" />
               </div>
-              <CardTitle className="text-dark-text">GitHub Integration</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-dark-text text-heading text-xl mb-3">GitHub Integration</CardTitle>
+              <CardDescription className="text-body">
                 Seamlessly connect with your GitHub repositories. Browse, edit, and commit 
-                changes directly from your tablet.
+                changes directly from your tablet with our intuitive interface.
               </CardDescription>
             </CardHeader>
           </Card>
 
-          <Card className="bg-dark-surface border-dark-border">
-            <CardHeader>
-              <div className="h-12 w-12 bg-green-500/10 rounded-lg flex items-center justify-center mb-4">
-                <Code className="h-6 w-6 text-green-400" />
+          <Card className="card-enhanced hover-lift animate-fade-in" style={{animationDelay: '0.1s'}}>
+            <CardHeader className="p-6">
+              <div className="h-14 w-14 bg-gradient-to-br from-green-500/20 to-green-500/10 rounded-xl flex items-center justify-center mb-6 shadow-soft">
+                <Code className="h-7 w-7 text-green-400" />
               </div>
-              <CardTitle className="text-dark-text">Monaco Editor</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-dark-text text-heading text-xl mb-3">Monaco Editor</CardTitle>
+              <CardDescription className="text-body">
                 Powered by VS Code's Monaco Editor with syntax highlighting, 
-                IntelliSense, and all the features you love.
+                IntelliSense, and all the professional features you love.
               </CardDescription>
             </CardHeader>
           </Card>
