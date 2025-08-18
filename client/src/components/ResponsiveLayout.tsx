@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { performanceTracker } from '@/lib/performance';
 
 // Phone Layout Components
-import MobileDropdowns from './MobileDropdowns';
+import SimpleMobileDropdowns from './SimpleMobileDropdowns';
 import MobileTouchBar from './MobileTouchBar';
 import MobileFileManager from './MobileFileManager';
 import MobileEnhancements from './MobileEnhancements';
@@ -109,7 +109,7 @@ export default function ResponsiveLayout({ children, onLogin }: ResponsiveLayout
       )}>
         {/* Mobile Header with Dropdowns */}
         <div className="safe-area-top">
-          <MobileDropdowns
+          <SimpleMobileDropdowns
             onAction={handleAction}
             currentFile={layoutState.currentFile}
             repositoryFiles={[]}
