@@ -1,8 +1,8 @@
-import AndroidStudioLayout from "@/components/AndroidStudioLayout";
+import ResponsiveLayout from "@/components/ResponsiveLayout";
 
 export default function MobileHome() {
   return (
-    <AndroidStudioLayout 
+    <ResponsiveLayout 
       onLogin={() => window.location.href = "/api/login"}
     />
   );

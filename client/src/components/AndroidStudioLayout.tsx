@@ -28,6 +28,8 @@ import Terminal from "./Terminal";
 import GitIntegration from "./GitIntegration";
 import WebViewer from "./WebViewer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useDeviceDetection } from "@/hooks/use-device-detection";
+import DeviceSelector from "./DeviceSelector";
 import type { Repository, File as FileType } from "@shared/schema";
 
 interface AndroidStudioLayoutProps {
@@ -55,6 +57,7 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
   const [zoomLevel, setZoomLevel] = useState(100);
   const [undoRedoState, setUndoRedoState] = useState({ canUndo: false, canRedo: false });
   const isMobile = useIsMobile();
+  const { deviceInfo, isPhone, isTablet, isDesktop } = useDeviceDetection();
 
   // Redirect to login if not authenticated
   useEffect(() => {

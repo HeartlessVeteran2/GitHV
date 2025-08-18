@@ -446,3 +446,162 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+/* Device-specific responsive classes */
+.device-phone {
+  --sidebar-width: 100vw;
+  --editor-font-size: clamp(14px, 4vw, 18px);
+  --button-size: 44px;
+  --spacing-unit: 8px;
+}
+
+.device-tablet {
+  --sidebar-width: 320px;
+  --editor-font-size: clamp(14px, 2vw, 16px);
+  --button-size: 40px;
+  --spacing-unit: 12px;
+}
+
+.device-desktop {
+  --sidebar-width: 280px;
+  --editor-font-size: 14px;
+  --button-size: 36px;
+  --spacing-unit: 16px;
+}
+
+/* Orientation-specific adjustments */
+.orientation-portrait.device-phone {
+  --panel-height: calc(100vh - 160px);
+  --touch-bar-height: 80px;
+}
+
+.orientation-landscape.device-phone {
+  --panel-height: calc(100vh - 120px);
+  --touch-bar-height: 60px;
+}
+
+/* Touch device optimizations */
+.touch-device {
+  --scroll-padding: 12px;
+  --hover-opacity: 1;
+}
+
+.touch-device button,
+.touch-device .clickable {
+  min-height: var(--touch-target-min, 44px);
+  min-width: var(--touch-target-min, 44px);
+}
+
+.no-touch {
+  --scroll-padding: 8px;
+  --hover-opacity: 0.8;
+}
+
+/* Network status indicators */
+.online .network-status {
+  color: hsl(var(--success-green));
+}
+
+.offline .network-status {
+  color: hsl(var(--destructive));
+}
+
+/* Phone-specific layout optimizations */
+.phone-layout .resizable-panel {
+  min-width: 100vw;
+}
+
+.phone-layout .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 50;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.phone-layout .sidebar.open {
+  transform: translateX(0);
+}
+
+.phone-layout .editor-container {
+  height: var(--panel-height);
+  overflow: hidden;
+}
+
+.phone-layout .touch-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--touch-bar-height);
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid hsl(var(--border));
+}
+
+/* Tablet-specific optimizations */
+.tablet-layout .sidebar {
+  width: var(--sidebar-width);
+}
+
+.tablet-layout .touch-controls {
+  display: block;
+}
+
+/* Desktop-specific optimizations */
+.desktop-layout .mobile-only {
+  display: none;
+}
+
+.desktop-layout .desktop-only {
+  display: block;
+}
+
+/* Performance optimizations for mobile */
+.device-phone * {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.device-phone .editor-container {
+  contain: layout style paint;
+}
+
+/* Touch gesture helpers */
+.touch-device .scrollable {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.touch-device .pinch-zoom {
+  touch-action: pinch-zoom;
+}
+
+.touch-device .pan-x {
+  touch-action: pan-x;
+}
+
+.touch-device .pan-y {
+  touch-action: pan-y;
+}
+
+/* Accessibility improvements for mobile */
+.device-phone .focus-visible {
+  outline: 3px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+.device-phone .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
