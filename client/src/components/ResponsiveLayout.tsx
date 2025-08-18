@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useDeviceDetection, getDeviceClasses } from '@/hooks/use-device-detection';
 import { cn } from '@/lib/utils';
+import { performanceTracker } from '@/lib/performance';
 
 // Phone Layout Components
 import MobileDropdowns from './MobileDropdowns';
@@ -34,6 +35,14 @@ export default function ResponsiveLayout({ children, onLogin }: ResponsiveLayout
     zoomLevel: isPhone ? 120 : 100,
     fullscreen: false
   });
+
+  // Performance tracking for layout changes
+  useEffect(() => {
+    performanceTracker.start('layout-render');
+    return () => {
+      performanceTracker.end('layout-render');
+    };
+  }, [deviceInfo.type]);
 
   // Auto-adjust layout based on device type changes
   useEffect(() => {

@@ -605,3 +605,92 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* Performance optimizations */
+.no-animations * {
+  animation-duration: 0s !important;
+  transition-duration: 0s !important;
+}
+
+.touch-optimized {
+  touch-action: manipulation;
+}
+
+.touch-optimized button,
+.touch-optimized .clickable {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.virtual-scrolling .scroll-container {
+  contain: layout style paint;
+  overflow-anchor: none;
+}
+
+.optimized-image {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.layout-optimized {
+  contain: layout;
+}
+
+.efficient-animation {
+  will-change: transform, opacity;
+}
+
+.efficient-animation:not(:hover):not(:focus) {
+  will-change: auto;
+}
+
+/* Mobile performance optimizations */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .scroll-container {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* Reduce repaints */
+  .mobile-optimized {
+    contain: layout style paint;
+  }
+  
+  /* Optimize images for mobile */
+  img {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
+
+/* Battery saving mode */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Network optimization hints */
+.preload-critical {
+  font-display: swap;
+}
+
+/* Memory efficiency */
+.lazy-load {
+  content-visibility: auto;
+  contain-intrinsic-size: 200px;
+}

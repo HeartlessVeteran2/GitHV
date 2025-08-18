@@ -3,13 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -20,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useDeviceDetection, type DeviceType } from '@/hooks/use-device-detection';
 
-export default function DeviceSelector() {
+export default function SimpleDeviceSelector() {
   const { 
     deviceInfo, 
     setDeviceType, 
@@ -37,19 +30,19 @@ export default function DeviceSelector() {
       value: 'phone',
       label: 'Phone',
       icon: <Smartphone className="h-4 w-4" />,
-      description: 'Mobile-first layout with touch optimizations'
+      description: 'Mobile-first layout'
     },
     {
       value: 'tablet',
       label: 'Tablet',
       icon: <Tablet className="h-4 w-4" />,
-      description: 'Balanced layout for touch and precision'
+      description: 'Balanced layout'
     },
     {
       value: 'desktop',
       label: 'Desktop',
       icon: <Monitor className="h-4 w-4" />,
-      description: 'Full-featured layout with all panels'
+      description: 'Full-featured layout'
     }
   ];
 
@@ -73,29 +66,30 @@ export default function DeviceSelector() {
       {/* Quick Device Type Indicator */}
       <Popover open={showDetails} onOpenChange={setShowDetails}>
         <PopoverTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-8 px-2 space-x-1"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex items-center space-x-2 h-8 px-2"
           >
-            <span className={getStatusColor()}>
-              {currentOption?.icon}
-            </span>
-            <span className="text-xs hidden sm:inline">
-              {currentOption?.label}
-            </span>
-            {deviceInfo.overridden && (
-              <Badge variant="outline" className="text-xs px-1 py-0 h-4">
-                Manual
-              </Badge>
-            )}
+            {currentOption?.icon}
+            <span className="text-xs font-medium">{currentOption?.label}</span>
+            <Badge 
+              variant="secondary" 
+              className={`text-xs h-4 px-1 ${getStatusColor()}`}
+            >
+              {deviceInfo.autoDetected ? 'Auto' : 'Manual'}
+            </Badge>
           </Button>
         </PopoverTrigger>
+        
         <PopoverContent className="w-80 p-0" align="end">
           <Card className="border-0 shadow-none">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center justify-between">
-                <span>Device & Display Settings</span>
+                <div className="flex items-center space-x-2">
+                  <Settings className="h-4 w-4" />
+                  <span>Device Settings</span>
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -107,26 +101,25 @@ export default function DeviceSelector() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Device Type Selector */}
+              {/* Device Type Buttons */}
               <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground">
                   Device Type
                 </label>
-                <Select 
-                  value={deviceInfo.type} 
-                  onValueChange={(value: DeviceType) => setDeviceType(value)}
-                >
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Select device type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {deviceOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-3 gap-1">
+                  {deviceOptions.map((option) => (
+                    <Button
+                      key={option.value}
+                      variant={deviceInfo.type === option.value ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setDeviceType(option.value)}
+                      className="flex flex-col h-auto p-2"
+                    >
+                      {option.icon}
+                      <span className="text-xs mt-1">{option.label}</span>
+                    </Button>
+                  ))}
+                </div>
               </div>
 
               {/* Auto-detect vs Manual */}
@@ -172,74 +165,40 @@ export default function DeviceSelector() {
                   <span className="text-muted-foreground">Touch Support</span>
                   <span>{deviceInfo.isTouch ? 'Yes' : 'No'}</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Pixel Ratio</span>
-                  <span>{deviceInfo.pixelRatio}x</span>
-                </div>
-
-                {/* Status Indicators */}
-                <div className="flex items-center justify-between pt-2">
-                  <div className="flex items-center space-x-3">
-                    {/* Network Status */}
-                    <div className="flex items-center space-x-1">
-                      {deviceInfo.isOnline ? (
-                        <Wifi className="h-3 w-3 text-green-400" />
-                      ) : (
-                        <WifiOff className="h-3 w-3 text-red-400" />
-                      )}
-                      <span className="text-xs text-muted-foreground">
-                        {deviceInfo.isOnline ? 'Online' : 'Offline'}
-                      </span>
-                    </div>
-                    
-                    {/* Battery Level (if available) */}
-                    {deviceInfo.batteryLevel !== undefined && (
-                      <div className="flex items-center space-x-1">
-                        <Battery className={`h-3 w-3 ${getBatteryColor()}`} />
-                        <span className="text-xs text-muted-foreground">
-                          {deviceInfo.batteryLevel}%
-                        </span>
-                      </div>
+                  <span className="text-muted-foreground">Connection</span>
+                  <div className="flex items-center space-x-1">
+                    {deviceInfo.isOnline ? (
+                      <Wifi className="h-3 w-3 text-green-400" />
+                    ) : (
+                      <WifiOff className="h-3 w-3 text-red-400" />
                     )}
+                    <span>{deviceInfo.isOnline ? 'Online' : 'Offline'}</span>
                   </div>
                 </div>
-              </div>
 
-              {/* Device Type Recommendation */}
-              {deviceInfo.overridden && deviceInfo.preferredType !== deviceInfo.type && (
-                <div className="p-2 bg-blue-50 dark:bg-blue-950/20 rounded-md">
-                  <div className="flex items-start space-x-2">
-                    <Info className="h-3 w-3 text-blue-500 mt-0.5 flex-shrink-0" />
-                    <div className="text-xs">
-                      <div className="font-medium text-blue-700 dark:text-blue-300">
-                        Recommendation
-                      </div>
-                      <div className="text-blue-600 dark:text-blue-400">
-                        Based on your screen size, {deviceInfo.preferredType} mode might work better.
-                      </div>
+                {deviceInfo.batteryLevel && (
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Battery</span>
+                    <div className="flex items-center space-x-1">
+                      <Battery className={`h-3 w-3 ${getBatteryColor()}`} />
+                      <span>{Math.round(deviceInfo.batteryLevel * 100)}%</span>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </CardContent>
           </Card>
         </PopoverContent>
       </Popover>
 
-      {/* Quick Status Indicators */}
-      <div className="flex items-center space-x-1">
-        {!deviceInfo.isOnline && (
-          <div title="Offline">
-            <WifiOff className="h-3 w-3 text-red-400" />
-          </div>
-        )}
-        {deviceInfo.batteryLevel !== undefined && deviceInfo.batteryLevel < 20 && (
-          <div title={`Battery: ${deviceInfo.batteryLevel}%`}>
-            <Battery className="h-3 w-3 text-red-400" />
-          </div>
-        )}
-      </div>
+      {/* Performance Indicator */}
+      <Badge variant="outline" className="text-xs h-6 px-2">
+        {isPhone && 'Mobile'}
+        {isTablet && 'Tablet'}
+        {isDesktop && 'Desktop'}
+      </Badge>
     </div>
   );
 }

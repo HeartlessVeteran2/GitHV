@@ -29,7 +29,7 @@ import GitIntegration from "./GitIntegration";
 import WebViewer from "./WebViewer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useDeviceDetection } from "@/hooks/use-device-detection";
-import DeviceSelector from "./DeviceSelector";
+import SimpleDeviceSelector from "./SimpleDeviceSelector";
 import type { Repository, File as FileType } from "@shared/schema";
 
 interface AndroidStudioLayoutProps {
@@ -473,6 +473,8 @@ export default function AndroidStudioLayout({ onLogin }: AndroidStudioLayoutProp
           <Bot className="h-4 w-4 mr-1" />
           Copilot
         </Button>
+        <div className="w-px h-6 bg-gray-600 mx-2" />
+        <SimpleDeviceSelector />
         </div>
       )}
       
