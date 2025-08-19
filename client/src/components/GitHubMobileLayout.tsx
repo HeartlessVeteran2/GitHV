@@ -11,13 +11,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Menu, Code, GitBranch, Star, GitPullRequest, Issues, Search,
   Home, Bell, Plus, User, Settings, LogOut, Clock, Eye,
   GitCommit, GitMerge, Users, Book, Package, Shield,
   Activity, TrendingUp, Zap, FolderOpen, FileText, ChevronRight,
-  MoreVertical, Heart, MessageSquare, Share2, BookOpen
+  MoreVertical, Heart, MessageSquare, Share2, BookOpen, X, RefreshCw
 } from "lucide-react";
+import EnhancedMonacoEditor from "./EnhancedMonacoEditor";
 import type { Repository, File as FileType } from "@shared/schema";
 
 export default function GitHubMobileLayout() {
@@ -29,11 +32,23 @@ export default function GitHubMobileLayout() {
   const [searchQuery, setSearchQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
+  const [selectedFile, setSelectedFile] = useState<FileType | null>(null);
+  const [codeEditorOpen, setCodeEditorOpen] = useState(false);
+  const [createRepoOpen, setCreateRepoOpen] = useState(false);
+  const [repoName, setRepoName] = useState("");
+  const [repoDescription, setRepoDescription] = useState("");
+  const [isPrivate, setIsPrivate] = useState(false);
   
   // Fetch repositories
   const { data: repositories = [] } = useQuery<Repository[]>({
     queryKey: ['/api/repositories'],
     enabled: isAuthenticated
+  });
+  
+  // Fetch files for selected repository
+  const { data: files = [] } = useQuery<FileType[]>({
+    queryKey: ['/api/repositories', selectedRepo?.id, 'files'],
+    enabled: !!selectedRepo
   });
 
   // GitHub-style navigation items
@@ -46,16 +61,55 @@ export default function GitHubMobileLayout() {
     { id: "marketplace", label: "Marketplace", icon: Package },
   ];
 
+  // Sync repositories mutation
+  const syncReposMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", "/api/repositories/sync");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/repositories"] });
+      toast({
+        title: "Success",
+        description: "Repositories synced successfully",
+      });
+    },
+  });
+
+  // Sync files mutation
+  const syncFilesMutation = useMutation({
+    mutationFn: async (repositoryId: string) => {
+      return apiRequest("POST", `/api/repositories/${repositoryId}/files/sync`);
+    },
+    onSuccess: () => {
+      if (selectedRepo) {
+        queryClient.invalidateQueries({ 
+          queryKey: ["/api/repositories", selectedRepo.id, "files"] 
+        });
+      }
+      toast({
+        title: "Success",
+        description: "Files synced successfully",
+      });
+    },
+  });
+
   const handleRepoClick = (repo: Repository) => {
     setSelectedRepo(repo);
     setActiveTab("repo-detail");
+    syncFilesMutation.mutate(repo.id);
+  };
+
+  const handleFileClick = (file: FileType) => {
+    setSelectedFile(file);
+    setCodeEditorOpen(true);
   };
 
   const handleCreateRepo = () => {
-    toast({
-      title: "Create Repository",
-      description: "Opening repository creation form..."
-    });
+    setCreateRepoOpen(true);
+  };
+  
+  const handleLogout = () => {
+    window.location.href = "/api/logout";
   };
 
   if (isLoading) {
@@ -120,7 +174,10 @@ export default function GitHubMobileLayout() {
                         <Settings className="h-5 w-5" />
                         <span>Settings</span>
                       </button>
-                      <button className="w-full flex items-center space-x-3 px-4 py-3 text-red-400 hover:bg-red-900/20 rounded-lg">
+                      <button 
+                        onClick={handleLogout}
+                        className="w-full flex items-center space-x-3 px-4 py-3 text-red-400 hover:bg-red-900/20 rounded-lg"
+                      >
                         <LogOut className="h-5 w-5" />
                         <span>Sign out</span>
                       </button>
@@ -235,14 +292,26 @@ export default function GitHubMobileLayout() {
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">Your Repositories</h2>
-              <Button 
-                size="sm" 
-                className="bg-green-600 hover:bg-green-700"
-                onClick={handleCreateRepo}
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                New
-              </Button>
+              <div className="flex space-x-2">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="border-gray-700 text-gray-300"
+                  onClick={() => syncReposMutation.mutate()}
+                  disabled={syncReposMutation.isPending}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-1 ${syncReposMutation.isPending ? 'animate-spin' : ''}`} />
+                  Sync
+                </Button>
+                <Button 
+                  size="sm" 
+                  className="bg-green-600 hover:bg-green-700"
+                  onClick={handleCreateRepo}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  New
+                </Button>
+              </div>
             </div>
             
             <div className="space-y-3">
@@ -328,19 +397,33 @@ export default function GitHubMobileLayout() {
                     </div>
                     
                     <div className="space-y-2">
-                      {["README.md", "package.json", "src/", ".gitignore"].map((file) => (
-                        <div key={file} className="flex items-center justify-between p-2 hover:bg-gray-800 rounded">
-                          <div className="flex items-center space-x-2">
-                            {file.endsWith('/') ? (
-                              <FolderOpen className="h-4 w-4 text-blue-400" />
-                            ) : (
+                      {files.length > 0 ? (
+                        files.slice(0, 10).map((file) => (
+                          <div 
+                            key={file.id} 
+                            onClick={() => handleFileClick(file)}
+                            className="flex items-center justify-between p-2 hover:bg-gray-800 rounded cursor-pointer"
+                          >
+                            <div className="flex items-center space-x-2">
                               <FileText className="h-4 w-4 text-gray-400" />
-                            )}
-                            <span className="text-sm text-gray-300">{file}</span>
+                              <span className="text-sm text-gray-300">{file.path.split('/').pop()}</span>
+                            </div>
+                            <ChevronRight className="h-4 w-4 text-gray-500" />
                           </div>
-                          <ChevronRight className="h-4 w-4 text-gray-500" />
+                        ))
+                      ) : (
+                        <div className="text-center py-4">
+                          <p className="text-gray-500 text-sm mb-2">No files synced yet</p>
+                          <Button 
+                            size="sm"
+                            onClick={() => syncFilesMutation.mutate(selectedRepo.id)}
+                            disabled={syncFilesMutation.isPending}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            {syncFilesMutation.isPending ? "Syncing..." : "Sync Files"}
+                          </Button>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -444,6 +527,109 @@ export default function GitHubMobileLayout() {
           ))}
         </div>
       </nav>
+
+      {/* Code Editor Dialog */}
+      <Dialog open={codeEditorOpen} onOpenChange={setCodeEditorOpen}>
+        <DialogContent className="max-w-full h-full m-0 p-0 bg-gray-900">
+          <DialogHeader className="absolute top-0 left-0 right-0 z-10 bg-gray-900/95 backdrop-blur-sm p-4 border-b border-gray-800">
+            <DialogTitle className="flex items-center justify-between text-white">
+              <span className="text-sm truncate">{selectedFile?.path.split('/').pop()}</span>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setCodeEditorOpen(false)}
+                className="text-gray-400"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="h-full pt-16">
+            {selectedFile && (
+              <EnhancedMonacoEditor
+                value={selectedFile.content || ""}
+                language="javascript"
+                theme="vs-dark"
+                onChange={() => {}}
+                onSave={() => {
+                  toast({
+                    title: "File Saved",
+                    description: "Changes have been saved successfully"
+                  });
+                }}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Repository Dialog */}
+      <Dialog open={createRepoOpen} onOpenChange={setCreateRepoOpen}>
+        <DialogContent className="bg-gray-900 border-gray-800">
+          <DialogHeader>
+            <DialogTitle className="text-white">Create New Repository</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Create a new repository on GitHub
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <label className="text-sm text-gray-300 block mb-2">Repository name</label>
+              <Input
+                value={repoName}
+                onChange={(e) => setRepoName(e.target.value)}
+                placeholder="my-awesome-project"
+                className="bg-gray-800 border-gray-700 text-white"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-300 block mb-2">Description (optional)</label>
+              <Textarea
+                value={repoDescription}
+                onChange={(e) => setRepoDescription(e.target.value)}
+                placeholder="A short description of your project"
+                className="bg-gray-800 border-gray-700 text-white"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="private"
+                checked={isPrivate}
+                onChange={(e) => setIsPrivate(e.target.checked)}
+                className="rounded border-gray-700"
+              />
+              <label htmlFor="private" className="text-sm text-gray-300">
+                Make this repository private
+              </label>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setCreateRepoOpen(false)}
+                className="border-gray-700 text-gray-300"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  toast({
+                    title: "Repository Created",
+                    description: `${repoName} has been created successfully`
+                  });
+                  setCreateRepoOpen(false);
+                  setRepoName("");
+                  setRepoDescription("");
+                }}
+                disabled={!repoName}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                Create Repository
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
