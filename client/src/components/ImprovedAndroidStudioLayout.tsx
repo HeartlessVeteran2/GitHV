@@ -20,6 +20,7 @@ import SmartSearchBar from "./SmartSearchBar";
 import Terminal from "./Terminal";
 import GitIntegration from "./GitIntegration";
 import WebViewer from "./WebViewer";
+import PerfectLoader from "./PerfectLoader";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useDeviceDetection } from "@/hooks/use-device-detection";
 // import MobileGestures from "./MobileGestures";
@@ -176,11 +177,7 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
   }, [repositories, currentRepository]);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
+    return <PerfectLoader />;
   }
 
   if (!isAuthenticated) {
@@ -188,25 +185,25 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
   }
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white' : 'bg-gradient-to-br from-gray-100 via-white to-gray-100 text-gray-900'} page-transition`}>
       {/* Desktop Top Menu Bar */}
       {!isMobile && (
-          <div className="h-12 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4">
+          <div className="h-12 bg-gray-800/90 backdrop-blur-md border-b border-gray-700/50 flex items-center justify-between px-4 shadow-lg">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <Code className="h-5 w-5 text-green-500" />
-                <span className="font-semibold">GitHV IDE</span>
+                <Code className="h-5 w-5 text-green-500 animate-pulse" />
+                <span className="font-semibold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">GitHV IDE</span>
               </div>
               
               <div className="flex items-center space-x-1">
-                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">File</Button>
-                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">Edit</Button>
-                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">View</Button>
-                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">Code</Button>
-                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">Run</Button>
-                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">Tools</Button>
-                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">VCS</Button>
-                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">Help</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive btn-premium">File</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive btn-premium">Edit</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive btn-premium">View</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive btn-premium">Code</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive btn-premium">Run</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive btn-premium">Tools</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive btn-premium">VCS</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive btn-premium">Help</Button>
               </div>
             </div>
 
@@ -221,18 +218,18 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
               </Button>
               
               <div className="flex items-center space-x-2">
-                <div className="h-6 w-6 rounded-full bg-blue-600 flex items-center justify-center text-xs">
+                <div className="h-6 w-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-xs shadow-lg animate-pulse">
                   {user?.email?.charAt(0).toUpperCase()}
                 </div>
-                <span className="text-sm">{user?.email}</span>
+                <span className="text-sm font-medium">{user?.email}</span>
               </div>
             </div>
           </div>
       )}
 
       {/* Smart Search Bar */}
-      <div className="p-4 border-b border-gray-700">
-        <div className="search-interactive">
+      <div className="p-4 border-b border-gray-700/50 bg-gray-800/50 backdrop-blur-sm">
+        <div className="search-interactive glass-morphism rounded-lg">
           <SmartSearchBar
             currentRepository={currentRepository}
             onFileSelect={handleFileSelect}
@@ -263,16 +260,16 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
           {!sidebarCollapsed && (
             <>
               <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-                <div className="h-full border-r border-gray-700 panel-interactive">
+                <div className="h-full border-r border-gray-700/50 panel-interactive glass-morphism">
                   <Tabs defaultValue="explorer" className="h-full">
-                      <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="explorer" className="tab-interactive ripple-effect">
+                      <TabsList className="grid w-full grid-cols-3 bg-gray-800/50 backdrop-blur-sm">
+                        <TabsTrigger value="explorer" className="tab-interactive ripple-effect data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-purple-500/20">
                           <Folder className="h-4 w-4 file-icon" />
                         </TabsTrigger>
-                        <TabsTrigger value="git" className="tab-interactive ripple-effect">
+                        <TabsTrigger value="git" className="tab-interactive ripple-effect data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/20 data-[state=active]:to-teal-500/20">
                           <GitBranch className="h-4 w-4 file-icon" />
                         </TabsTrigger>
-                        <TabsTrigger value="search" className="tab-interactive ripple-effect">
+                        <TabsTrigger value="search" className="tab-interactive ripple-effect data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-pink-500/20">
                           <Search className="h-4 w-4 file-icon" />
                         </TabsTrigger>
                       </TabsList>
@@ -290,7 +287,7 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
                       </TabsContent>
                       
                       <TabsContent value="git" className="h-full">
-                        <GitIntegration currentRepository={currentRepository} />
+                        <GitIntegration />
                       </TabsContent>
                       
                       <TabsContent value="search" className="h-full p-4">
@@ -313,18 +310,18 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
               <ResizablePanel defaultSize={terminalCollapsed ? 100 : 70}>
                 <div className="h-full">
                     {openFiles.length === 0 ? (
-                      <div className="h-full flex items-center justify-center">
-                        <div className="text-center text-gray-400">
-                          <FileCode className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                          <h3 className="text-lg font-semibold mb-2">Welcome to GitHV IDE</h3>
-                          <p className="mb-4">Select a file from the explorer to start coding</p>
+                      <div className="h-full flex items-center justify-center bg-gradient-to-br from-gray-800/50 to-gray-900/50">
+                        <div className="text-center text-gray-400 page-transition">
+                          <FileCode className="h-12 w-12 mx-auto mb-4 opacity-50 animate-pulse" />
+                          <h3 className="text-lg font-semibold mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Welcome to GitHV IDE</h3>
+                          <p className="mb-4 text-gray-300">Your premium development environment</p>
                           <div className="flex justify-center space-x-2">
-                            <Button variant="outline" size="sm" onClick={() => setSidebarCollapsed(false)} className="btn-secondary-interactive ripple-effect">
-                              <Folder className="h-4 w-4 mr-2 file-icon" />
+                            <Button variant="outline" size="sm" onClick={() => setSidebarCollapsed(false)} className="btn-secondary-interactive ripple-effect btn-premium border-blue-500/30 hover:border-blue-500/60">
+                              <Folder className="h-4 w-4 mr-2 file-icon text-blue-400" />
                               Open Explorer
                             </Button>
-                            <Button variant="outline" size="sm" className="btn-secondary-interactive ripple-effect">
-                              <Plus className="h-4 w-4 mr-2 file-icon" />
+                            <Button variant="outline" size="sm" className="btn-secondary-interactive ripple-effect btn-premium border-green-500/30 hover:border-green-500/60">
+                              <Plus className="h-4 w-4 mr-2 file-icon text-green-400" />
                               New File
                             </Button>
                           </div>
@@ -333,7 +330,7 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
                     ) : (
                       <Tabs value={activeFileId || ""} onValueChange={setActiveFileId}>
                         {/* File Tabs */}
-                        <div className="border-b border-gray-700 bg-gray-800">
+                        <div className="border-b border-gray-700/50 bg-gray-800/90 backdrop-blur-sm">
                           <TabsList className="bg-transparent h-auto p-0">
                             <ScrollArea className="max-w-full">
                               <div className="flex">
@@ -341,15 +338,15 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
                                   <TabsTrigger
                                     key={file.id}
                                     value={file.id}
-                                    className="flex items-center space-x-2 px-4 py-2 border-r border-gray-700 data-[state=active]:bg-gray-700 tab-interactive ripple-effect stagger-item"
+                                    className="flex items-center space-x-2 px-4 py-2 border-r border-gray-700/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/10 data-[state=active]:to-purple-500/10 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 tab-interactive ripple-effect stagger-item"
                                     style={{ animationDelay: `${index * 50}ms` }}
                                   >
-                                    <FileCode className="h-4 w-4 file-icon" />
-                                    <span>{file.path.split('/').pop()}</span>
+                                    <FileCode className="h-4 w-4 file-icon text-green-400" />
+                                    <span className="text-sm font-medium">{file.path.split('/').pop()}</span>
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="p-0 h-4 w-4 ml-2 icon-btn-interactive"
+                                      className="p-0 h-4 w-4 ml-2 icon-btn-interactive hover:text-red-400"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         handleFileClose(file.id);
@@ -400,17 +397,21 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
       </div>
 
       {/* Status Bar */}
-      <div className="h-6 bg-gray-800 border-t border-gray-700 flex items-center justify-between px-4 text-xs text-gray-400">
+      <div className="h-6 bg-gray-800/90 backdrop-blur-sm border-t border-gray-700/50 flex items-center justify-between px-4 text-xs text-gray-400 glass-morphism">
         <div className="flex items-center space-x-4">
-          <span>Ln {1}, Col {1}</span>
-          {activeFile && <span>{getLanguageFromPath(activeFile.path)}</span>}
-          <span>UTF-8</span>
-          <span>LF</span>
+          <span className="hover:text-white transition-colors cursor-pointer">Ln {1}, Col {1}</span>
+          {activeFile && <span className="hover:text-white transition-colors cursor-pointer">{getLanguageFromPath(activeFile.path)}</span>}
+          <span className="hover:text-white transition-colors cursor-pointer">UTF-8</span>
+          <span className="hover:text-white transition-colors cursor-pointer">LF</span>
         </div>
         <div className="flex items-center space-x-4">
-          <span>Zoom: {zoomLevel}%</span>
-          <span>Files: {openFiles.length}</span>
-          {currentRepository && <span>Repo: {currentRepository.name}</span>}
+          <span className="hover:text-white transition-colors cursor-pointer">Zoom: {zoomLevel}%</span>
+          <span className="hover:text-white transition-colors cursor-pointer">Files: {openFiles.length}</span>
+          {currentRepository && <span className="hover:text-white transition-colors cursor-pointer bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Repo: {currentRepository.name}</span>}
+          <div className="flex items-center space-x-1">
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" title="Connected" />
+            <span className="text-green-400 text-xs">Ready</span>
+          </div>
         </div>
       </div>
 
@@ -418,7 +419,6 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
       {webViewerOpen && (
         <div className="fixed inset-4 z-50 bg-white rounded-lg shadow-2xl">
           <WebViewer
-            url="http://localhost:3000"
             isOpen={webViewerOpen}
             onClose={() => setWebViewerOpen(false)}
           />
