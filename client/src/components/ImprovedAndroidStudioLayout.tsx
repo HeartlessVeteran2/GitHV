@@ -199,14 +199,14 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
               </div>
               
               <div className="flex items-center space-x-1">
-                <Button variant="ghost" size="sm" className="text-xs">File</Button>
-                <Button variant="ghost" size="sm" className="text-xs">Edit</Button>
-                <Button variant="ghost" size="sm" className="text-xs">View</Button>
-                <Button variant="ghost" size="sm" className="text-xs">Code</Button>
-                <Button variant="ghost" size="sm" className="text-xs">Run</Button>
-                <Button variant="ghost" size="sm" className="text-xs">Tools</Button>
-                <Button variant="ghost" size="sm" className="text-xs">VCS</Button>
-                <Button variant="ghost" size="sm" className="text-xs">Help</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">File</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">Edit</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">View</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">Code</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">Run</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">Tools</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">VCS</Button>
+                <Button variant="ghost" size="sm" className="text-xs btn-ghost-interactive menu-item-interactive">Help</Button>
               </div>
             </div>
 
@@ -215,6 +215,7 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
                 variant="ghost"
                 size="sm"
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="icon-btn-interactive ripple-effect"
               >
                 {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
@@ -231,26 +232,28 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
 
       {/* Smart Search Bar */}
       <div className="p-4 border-b border-gray-700">
-        <SmartSearchBar
-          currentRepository={currentRepository}
-          onFileSelect={handleFileSelect}
-          onCommand={(command) => {
-            switch (command) {
-              case 'file.save':
-                handleSave();
-                break;
-              case 'run.file':
-                handleRun();
-                break;
-              case 'format.document':
-                handleFormat();
-                break;
-              default:
-                console.log('Command:', command);
-            }
-          }}
-          className="max-w-2xl mx-auto"
-        />
+        <div className="search-interactive">
+          <SmartSearchBar
+            currentRepository={currentRepository}
+            onFileSelect={handleFileSelect}
+            onCommand={(command) => {
+              switch (command) {
+                case 'file.save':
+                  handleSave();
+                  break;
+                case 'run.file':
+                  handleRun();
+                  break;
+                case 'format.document':
+                  handleFormat();
+                  break;
+                default:
+                  console.log('Command:', command);
+              }
+            }}
+            className="max-w-2xl mx-auto"
+          />
+        </div>
       </div>
 
       {/* Main Content Area */}
@@ -260,17 +263,17 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
           {!sidebarCollapsed && (
             <>
               <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-                <div className="h-full border-r border-gray-700">
+                <div className="h-full border-r border-gray-700 panel-interactive">
                   <Tabs defaultValue="explorer" className="h-full">
                       <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="explorer">
-                          <Folder className="h-4 w-4" />
+                        <TabsTrigger value="explorer" className="tab-interactive ripple-effect">
+                          <Folder className="h-4 w-4 file-icon" />
                         </TabsTrigger>
-                        <TabsTrigger value="git">
-                          <GitBranch className="h-4 w-4" />
+                        <TabsTrigger value="git" className="tab-interactive ripple-effect">
+                          <GitBranch className="h-4 w-4 file-icon" />
                         </TabsTrigger>
-                        <TabsTrigger value="search">
-                          <Search className="h-4 w-4" />
+                        <TabsTrigger value="search" className="tab-interactive ripple-effect">
+                          <Search className="h-4 w-4 file-icon" />
                         </TabsTrigger>
                       </TabsList>
                       
@@ -316,12 +319,12 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
                           <h3 className="text-lg font-semibold mb-2">Welcome to GitHV IDE</h3>
                           <p className="mb-4">Select a file from the explorer to start coding</p>
                           <div className="flex justify-center space-x-2">
-                            <Button variant="outline" size="sm" onClick={() => setSidebarCollapsed(false)}>
-                              <Folder className="h-4 w-4 mr-2" />
+                            <Button variant="outline" size="sm" onClick={() => setSidebarCollapsed(false)} className="btn-secondary-interactive ripple-effect">
+                              <Folder className="h-4 w-4 mr-2 file-icon" />
                               Open Explorer
                             </Button>
-                            <Button variant="outline" size="sm">
-                              <Plus className="h-4 w-4 mr-2" />
+                            <Button variant="outline" size="sm" className="btn-secondary-interactive ripple-effect">
+                              <Plus className="h-4 w-4 mr-2 file-icon" />
                               New File
                             </Button>
                           </div>
@@ -334,18 +337,19 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
                           <TabsList className="bg-transparent h-auto p-0">
                             <ScrollArea className="max-w-full">
                               <div className="flex">
-                                {openFiles.map((file) => (
+                                {openFiles.map((file, index) => (
                                   <TabsTrigger
                                     key={file.id}
                                     value={file.id}
-                                    className="flex items-center space-x-2 px-4 py-2 border-r border-gray-700 data-[state=active]:bg-gray-700"
+                                    className="flex items-center space-x-2 px-4 py-2 border-r border-gray-700 data-[state=active]:bg-gray-700 tab-interactive ripple-effect stagger-item"
+                                    style={{ animationDelay: `${index * 50}ms` }}
                                   >
-                                    <FileCode className="h-4 w-4" />
+                                    <FileCode className="h-4 w-4 file-icon" />
                                     <span>{file.path.split('/').pop()}</span>
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="p-0 h-4 w-4 ml-2"
+                                      className="p-0 h-4 w-4 ml-2 icon-btn-interactive"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         handleFileClose(file.id);

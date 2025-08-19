@@ -4,6 +4,233 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Micro-interactions and animations */
+@layer base {
+  :root {
+    /* Animation durations */
+    --animation-duration-fast: 150ms;
+    --animation-duration-normal: 250ms;
+    --animation-duration-slow: 350ms;
+    
+    /* Easing functions */
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* Hover state variables */
+    --hover-scale: 1.02;
+    --hover-brightness: 1.1;
+    --hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --hover-shadow-dark: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@layer components {
+  /* Button micro-interactions */
+  .btn-interactive {
+    @apply transition-all duration-200 ease-out;
+    @apply hover:scale-[1.02] hover:brightness-110;
+    @apply active:scale-[0.98] active:brightness-95;
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500/50;
+  }
+  
+  .btn-primary-interactive {
+    @apply btn-interactive;
+    @apply hover:shadow-lg hover:shadow-blue-500/25;
+    @apply dark:hover:shadow-blue-400/20;
+  }
+  
+  .btn-secondary-interactive {
+    @apply btn-interactive;
+    @apply hover:bg-gray-100 dark:hover:bg-gray-700;
+    @apply hover:border-gray-300 dark:hover:border-gray-600;
+  }
+  
+  .btn-ghost-interactive {
+    @apply btn-interactive;
+    @apply hover:bg-gray-100/80 dark:hover:bg-gray-800/80;
+    @apply hover:backdrop-blur-sm;
+  }
+  
+  /* Menu item interactions */
+  .menu-item-interactive {
+    @apply transition-all duration-150 ease-out;
+    @apply hover:bg-gray-100 dark:hover:bg-gray-700;
+    @apply hover:translate-x-1 hover:shadow-sm;
+    @apply active:translate-x-0 active:scale-[0.99];
+    @apply cursor-pointer relative overflow-hidden;
+  }
+  
+  .menu-item-interactive::before {
+    @apply content-[''] absolute left-0 top-0 h-full w-0;
+    @apply bg-blue-500 transition-all duration-200 ease-out;
+    @apply hover:w-1;
+  }
+  
+  /* Tab interactions */
+  .tab-interactive {
+    @apply transition-all duration-200 ease-out;
+    @apply hover:bg-gray-100 dark:hover:bg-gray-700;
+    @apply hover:scale-[1.02] hover:shadow-sm;
+    @apply data-[state=active]:bg-gray-200 dark:data-[state=active]:bg-gray-600;
+    @apply data-[state=active]:shadow-inner;
+  }
+  
+  /* Icon button interactions */
+  .icon-btn-interactive {
+    @apply transition-all duration-150 ease-out;
+    @apply hover:scale-110 hover:rotate-6;
+    @apply active:scale-95 active:rotate-0;
+    @apply hover:shadow-md;
+  }
+  
+  /* Card interactions */
+  .card-interactive {
+    @apply transition-all duration-250 ease-out;
+    @apply hover:shadow-lg hover:shadow-gray-200/50;
+    @apply dark:hover:shadow-gray-900/50;
+    @apply hover:scale-[1.01] hover:-translate-y-1;
+    @apply hover:border-gray-300 dark:hover:border-gray-600;
+  }
+  
+  /* Input interactions */
+  .input-interactive {
+    @apply transition-all duration-200 ease-out;
+    @apply hover:border-gray-400 dark:hover:border-gray-500;
+    @apply focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20;
+    @apply focus:scale-[1.01] focus:shadow-md;
+  }
+  
+  /* Dropdown menu animations */
+  .dropdown-enter {
+    @apply animate-in fade-in-0 zoom-in-95 slide-in-from-top-2;
+    @apply duration-200;
+  }
+  
+  .dropdown-exit {
+    @apply animate-out fade-out-0 zoom-out-95 slide-out-to-top-2;
+    @apply duration-150;
+  }
+  
+  /* Tooltip animations */
+  .tooltip-enter {
+    @apply animate-in fade-in-0 zoom-in-95;
+    @apply duration-150;
+  }
+  
+  /* File explorer item interactions */
+  .file-item-interactive {
+    @apply transition-all duration-150 ease-out;
+    @apply hover:bg-blue-50 dark:hover:bg-blue-900/20;
+    @apply hover:translate-x-2 hover:border-l-2 hover:border-blue-500;
+    @apply active:translate-x-1 active:scale-[0.99];
+    @apply cursor-pointer relative;
+  }
+  
+  .file-item-interactive:hover .file-icon {
+    @apply transform scale-110 rotate-3;
+    @apply transition-transform duration-150 ease-out;
+  }
+  
+  /* Sidebar panel interactions */
+  .panel-interactive {
+    @apply transition-all duration-300 ease-in-out;
+    @apply hover:shadow-lg hover:shadow-gray-200/30;
+    @apply dark:hover:shadow-gray-900/30;
+  }
+  
+  /* Search bar interactions */
+  .search-interactive {
+    @apply transition-all duration-200 ease-out;
+    @apply hover:shadow-md hover:shadow-blue-500/10;
+    @apply focus-within:shadow-lg focus-within:shadow-blue-500/20;
+    @apply focus-within:scale-[1.02] focus-within:border-blue-500;
+  }
+  
+  /* Status indicator animations */
+  .status-pulse {
+    @apply animate-pulse;
+  }
+  
+  .status-bounce {
+    @apply animate-bounce;
+  }
+  
+  /* Loading spinner enhancement */
+  .spinner-enhanced {
+    @apply animate-spin;
+    animation-duration: 1s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+  }
+  
+  /* Ripple effect for buttons */
+  .ripple-effect {
+    @apply relative overflow-hidden;
+  }
+  
+  .ripple-effect::after {
+    @apply content-[''] absolute top-1/2 left-1/2;
+    @apply w-0 h-0 rounded-full bg-white/30;
+    @apply transition-all duration-300 ease-out;
+    @apply transform -translate-x-1/2 -translate-y-1/2;
+    @apply pointer-events-none;
+  }
+  
+  .ripple-effect:active::after {
+    @apply w-full h-full;
+    @apply opacity-0;
+  }
+  
+  /* Stagger animations for lists */
+  .stagger-item {
+    @apply opacity-0 translate-y-4;
+    animation: staggerFadeIn 0.3s ease-out forwards;
+  }
+  
+  .stagger-item:nth-child(1) { animation-delay: 0ms; }
+  .stagger-item:nth-child(2) { animation-delay: 50ms; }
+  .stagger-item:nth-child(3) { animation-delay: 100ms; }
+  .stagger-item:nth-child(4) { animation-delay: 150ms; }
+  .stagger-item:nth-child(5) { animation-delay: 200ms; }
+  .stagger-item:nth-child(n+6) { animation-delay: 250ms; }
+}
+
+@keyframes staggerFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom scrollbar with hover effects */
+::-webkit-scrollbar {
+  @apply w-2 h-2;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
+  @apply rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600;
+  @apply rounded-full transition-colors duration-200;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-500;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 :root {
   --background: hsl(0 0% 100%);
   --foreground: hsl(210 25% 7.8431%);
