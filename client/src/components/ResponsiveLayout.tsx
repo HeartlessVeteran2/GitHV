@@ -8,7 +8,7 @@ import SimpleMobileDropdowns from './SimpleMobileDropdowns';
 import MobileFileManager from './MobileFileManager';
 
 // Tablet Layout Components  
-import AndroidStudioLayout from './AndroidStudioLayout';
+import ImprovedAndroidStudioLayout from './ImprovedAndroidStudioLayout';
 
 // Desktop Layout Components
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
@@ -168,7 +168,7 @@ export default function ResponsiveLayout({ children, onLogin }: ResponsiveLayout
         "min-h-screen bg-dark-bg text-dark-text",
         "tablet-layout"
       )}>
-        <AndroidStudioLayout onLogin={onLogin} />
+        <ImprovedAndroidStudioLayout onLogin={onLogin} />
       </div>
     );
   }

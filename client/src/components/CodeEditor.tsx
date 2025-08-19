@@ -7,7 +7,7 @@ import type { File as FileType } from "@shared/schema";
 import CodeCompletion from "./CodeCompletion";
 import TouchToolbar from "./TouchToolbar";
 import CommandPalette from "./CommandPalette";
-import SimpleGlobalSearch from "./SimpleGlobalSearch";
+// import SmartSearchBar from "./SmartSearchBar";
 import VoiceCommand from "./VoiceCommand";
 import CodeSnippets from "./CodeSnippets";
 import PerformanceMonitor from "./PerformanceMonitor";
@@ -51,7 +51,7 @@ export default function CodeEditor({
   const [completionPosition, setCompletionPosition] = useState({ x: 0, y: 0 });
   const [currentLine, setCurrentLine] = useState("");
   const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [showGlobalSearch, setShowGlobalSearch] = useState(false);
+
   const [showVoiceCommands, setShowVoiceCommands] = useState(false);
   const [isListeningVoice, setIsListeningVoice] = useState(false);
   const [showCodeSnippets, setShowCodeSnippets] = useState(false);
@@ -88,7 +88,7 @@ export default function CodeEditor({
         // Open terminal
         break;
       case "search":
-        setShowGlobalSearch(true);
+        console.log('Search triggered via voice');
         break;
       case "git-status":
         setShowGitVisualization(true);
@@ -173,11 +173,7 @@ export default function CodeEditor({
       setShowCommandPalette(true);
     }
 
-    // Global search shortcut
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === "KeyF") {
-      e.preventDefault();
-      setShowGlobalSearch(true);
-    }
+
   };
 
   // Keyboard shortcut effects
@@ -201,11 +197,7 @@ export default function CodeEditor({
         setShowCommandPalette(true);
       }
 
-      // Global search
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'F') {
-        e.preventDefault();
-        setShowGlobalSearch(true);
-      }
+
     };
 
     document.addEventListener('keydown', handleKeyDown);
@@ -402,7 +394,7 @@ export default function CodeEditor({
         onSave={onSave}
         onRun={onRun}
         onOpenTerminal={() => {/* Open terminal */}}
-        onOpenSearch={() => setShowGlobalSearch(true)}
+        onOpenSearch={() => console.log('Search opened')}
         onOpenGit={() => setShowGitVisualization(true)}
         onOpenFiles={() => {/* Open files */}}
         onOpenSettings={() => {/* Open settings */}}
@@ -442,17 +434,12 @@ export default function CodeEditor({
         onSettingsOpen={() => console.log('Open settings')}
         onSave={onSave}
         onRun={onRun}
-        onSearch={() => setShowGlobalSearch(true)}
+        onSearch={() => console.log('Search opened')}
         onVoiceCommand={() => setIsListeningVoice(true)}
         onPreviewToggle={() => setIsPreviewVisible(!isPreviewVisible)}
       />
 
-      <SimpleGlobalSearch
-        isOpen={showGlobalSearch}
-        onClose={() => setShowGlobalSearch(false)}
-        onFileSelect={(file) => console.log('Selected file:', file)}
-        repositories={repositories}
-      />
+
 
       {showVoiceCommands && (
         <div className="fixed bottom-20 right-4 z-50 w-80">

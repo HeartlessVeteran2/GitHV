@@ -230,16 +230,9 @@ export default function Home() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "p") {
-        e.preventDefault();
-        setCommandPaletteOpen(true);
-      }
       if ((e.metaKey || e.ctrlKey) && e.key === "s") {
         e.preventDefault();
         handleSave();
-      }
-      if (e.key === "Escape") {
-        setCommandPaletteOpen(false);
       }
     };
 
@@ -306,7 +299,7 @@ export default function Home() {
             />
           )}
           
-          {terminalVisible && <Terminal />}
+          {terminalVisible && <Terminal isOpen={terminalVisible} onClose={() => setTerminalVisible(false)} />}
         </div>
       </div>
     </div>
