@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { 
-  Menu, Code, GitBranch, Star, GitPullRequest, Issues, Search,
+  Menu, Code, GitBranch, Star, GitPullRequest, CircleDot, Search,
   Home, Bell, Plus, User, Settings, LogOut, Clock, Eye,
   GitCommit, GitMerge, Users, Book, Package, Shield,
   Activity, TrendingUp, Zap, FolderOpen, FileText, ChevronRight,
@@ -56,7 +56,7 @@ export default function GitHubMobileLayout() {
     { id: "home", label: "Home", icon: Home },
     { id: "repositories", label: "Repositories", icon: Book },
     { id: "pull-requests", label: "Pull Requests", icon: GitPullRequest },
-    { id: "issues", label: "Issues", icon: Issues },
+    { id: "issues", label: "Issues", icon: CircleDot },
     { id: "explore", label: "Explore", icon: TrendingUp },
     { id: "marketplace", label: "Marketplace", icon: Package },
   ];
@@ -135,7 +135,7 @@ export default function GitHubMobileLayout() {
           <div className="flex items-center space-x-3">
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-white">
+                <Button variant="ghost" size="icon" className="text-white icon-hover">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
@@ -159,13 +159,13 @@ export default function GitHubMobileLayout() {
                           setActiveTab(item.id);
                           setMenuOpen(false);
                         }}
-                        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
+                        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg menu-micro ${
                           activeTab === item.id 
                             ? "bg-blue-600/20 text-blue-400 border-l-2 border-blue-400" 
                             : "text-gray-300 hover:bg-gray-800"
                         }`}
                       >
-                        <item.icon className="h-5 w-5" />
+                        <item.icon className="h-5 w-5 icon-hover" />
                         <span className="font-medium">{item.label}</span>
                       </button>
                     ))}
@@ -194,10 +194,10 @@ export default function GitHubMobileLayout() {
           </div>
           
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" className="text-white">
+            <Button variant="ghost" size="icon" className="text-white icon-hover pulse-notification">
               <Bell className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-white">
+            <Button variant="ghost" size="icon" className="text-white icon-hover">
               <Plus className="h-5 w-5" />
             </Button>
           </div>
@@ -212,7 +212,7 @@ export default function GitHubMobileLayout() {
               placeholder="Search repositories, code, users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+              className="w-full pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 input-focus"
             />
           </div>
         </div>
@@ -236,12 +236,12 @@ export default function GitHubMobileLayout() {
                   { action: "forked", repo: "vercel/next.js", time: "5 hours ago", icon: GitBranch },
                   { action: "opened PR", repo: "microsoft/vscode", time: "1 day ago", icon: GitPullRequest },
                 ].map((activity, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+                  <div key={i} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg hover-lift slide-in-right" style={{ animationDelay: `${i * 100}ms` }}>
                     <div className="flex items-center space-x-3">
-                      <activity.icon className="h-4 w-4 text-gray-400" />
+                      <activity.icon className="h-4 w-4 text-gray-400 icon-hover" />
                       <div>
                         <p className="text-sm text-white">You {activity.action}</p>
-                        <p className="text-xs text-blue-400">{activity.repo}</p>
+                        <p className="text-xs text-blue-400 hover:underline cursor-pointer">{activity.repo}</p>
                       </div>
                     </div>
                     <span className="text-xs text-gray-500">{activity.time}</span>
@@ -264,20 +264,20 @@ export default function GitHubMobileLayout() {
                   { name: "openai/gpt-4", desc: "Latest AI model", stars: "28.1k", lang: "Python" },
                   { name: "stripe/stripe-js", desc: "Payment processing", stars: "12.3k", lang: "JavaScript" },
                 ].map((repo, i) => (
-                  <div key={i} className="p-3 bg-gray-800 rounded-lg">
+                  <div key={i} className="p-3 bg-gray-800 rounded-lg card-hover slide-in-left" style={{ animationDelay: `${i * 100}ms` }}>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h4 className="text-sm font-semibold text-blue-400">{repo.name}</h4>
+                        <h4 className="text-sm font-semibold text-blue-400 hover:underline cursor-pointer">{repo.name}</h4>
                         <p className="text-xs text-gray-400 mt-1">{repo.desc}</p>
                         <div className="flex items-center space-x-3 mt-2">
-                          <Badge className="bg-gray-700 text-gray-300">{repo.lang}</Badge>
+                          <Badge className="bg-gray-700 text-gray-300 hover-scale">{repo.lang}</Badge>
                           <div className="flex items-center space-x-1">
-                            <Star className="h-3 w-3 text-yellow-400" />
+                            <Star className="h-3 w-3 text-yellow-400 hover-scale" />
                             <span className="text-xs text-gray-400">{repo.stars}</span>
                           </div>
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon" className="text-gray-400">
+                      <Button variant="ghost" size="icon" className="text-gray-400 icon-hover">
                         <Star className="h-4 w-4" />
                       </Button>
                     </div>
@@ -296,7 +296,7 @@ export default function GitHubMobileLayout() {
                 <Button 
                   size="sm" 
                   variant="outline"
-                  className="border-gray-700 text-gray-300"
+                  className="border-gray-700 text-gray-300 btn-micro"
                   onClick={() => syncReposMutation.mutate()}
                   disabled={syncReposMutation.isPending}
                 >
@@ -305,7 +305,7 @@ export default function GitHubMobileLayout() {
                 </Button>
                 <Button 
                   size="sm" 
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-green-600 hover:bg-green-700 btn-micro hover-lift"
                   onClick={handleCreateRepo}
                 >
                   <Plus className="h-4 w-4 mr-1" />
@@ -315,41 +315,42 @@ export default function GitHubMobileLayout() {
             </div>
             
             <div className="space-y-3">
-              {repositories.map((repo) => (
+              {repositories.map((repo, i) => (
                 <Card 
                   key={repo.id} 
-                  className="bg-gray-900 border-gray-800 cursor-pointer hover:bg-gray-800/50 transition-all"
+                  className="bg-gray-900 border-gray-800 cursor-pointer card-hover slide-in-right"
+                  style={{ animationDelay: `${i * 50}ms` }}
                   onClick={() => handleRepoClick(repo)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-2">
-                          <Book className="h-4 w-4 text-gray-400" />
-                          <h3 className="font-semibold text-blue-400">{repo.name}</h3>
+                          <Book className="h-4 w-4 text-gray-400 icon-hover" />
+                          <h3 className="font-semibold text-blue-400 hover:underline">{repo.name}</h3>
                           {repo.private && (
-                            <Badge className="bg-gray-700 text-gray-300 text-xs">Private</Badge>
+                            <Badge className="bg-gray-700 text-gray-300 text-xs hover-scale">Private</Badge>
                           )}
                         </div>
                         {repo.description && (
                           <p className="text-sm text-gray-400 mt-1">{repo.description}</p>
                         )}
                         <div className="flex items-center space-x-4 mt-3">
-                          <div className="flex items-center space-x-1">
+                          <div className="flex items-center space-x-1 hover-scale">
                             <div className="w-3 h-3 rounded-full bg-yellow-400" />
                             <span className="text-xs text-gray-400">JavaScript</span>
                           </div>
-                          <div className="flex items-center space-x-1">
+                          <div className="flex items-center space-x-1 hover-scale">
                             <Star className="h-3 w-3 text-gray-400" />
                             <span className="text-xs text-gray-400">0</span>
                           </div>
-                          <div className="flex items-center space-x-1">
+                          <div className="flex items-center space-x-1 hover-scale">
                             <GitBranch className="h-3 w-3 text-gray-400" />
                             <span className="text-xs text-gray-400">0</span>
                           </div>
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon" className="text-gray-400">
+                      <Button variant="ghost" size="icon" className="text-gray-400 icon-hover">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </div>
@@ -377,10 +378,10 @@ export default function GitHubMobileLayout() {
 
             <Tabs defaultValue="code" className="w-full">
               <TabsList className="grid w-full grid-cols-4 bg-gray-800">
-                <TabsTrigger value="code">Code</TabsTrigger>
-                <TabsTrigger value="issues">Issues</TabsTrigger>
-                <TabsTrigger value="prs">PRs</TabsTrigger>
-                <TabsTrigger value="actions">Actions</TabsTrigger>
+                <TabsTrigger value="code" className="tab-hover">Code</TabsTrigger>
+                <TabsTrigger value="issues" className="tab-hover">Issues</TabsTrigger>
+                <TabsTrigger value="prs" className="tab-hover">PRs</TabsTrigger>
+                <TabsTrigger value="actions" className="tab-hover">Actions</TabsTrigger>
               </TabsList>
               
               <TabsContent value="code" className="mt-4">
@@ -398,17 +399,18 @@ export default function GitHubMobileLayout() {
                     
                     <div className="space-y-2">
                       {files.length > 0 ? (
-                        files.slice(0, 10).map((file) => (
+                        files.slice(0, 10).map((file, i) => (
                           <div 
                             key={file.id} 
                             onClick={() => handleFileClick(file)}
-                            className="flex items-center justify-between p-2 hover:bg-gray-800 rounded cursor-pointer"
+                            className="flex items-center justify-between p-2 hover:bg-gray-800 rounded cursor-pointer menu-micro slide-in-left"
+                            style={{ animationDelay: `${i * 30}ms` }}
                           >
                             <div className="flex items-center space-x-2">
-                              <FileText className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm text-gray-300">{file.path.split('/').pop()}</span>
+                              <FileText className="h-4 w-4 text-gray-400 icon-hover" />
+                              <span className="text-sm text-gray-300 hover:text-blue-400 transition-colors">{file.path.split('/').pop()}</span>
                             </div>
-                            <ChevronRight className="h-4 w-4 text-gray-500" />
+                            <ChevronRight className="h-4 w-4 text-gray-500 icon-hover" />
                           </div>
                         ))
                       ) : (
@@ -429,12 +431,12 @@ export default function GitHubMobileLayout() {
                 </Card>
                 
                 <div className="grid grid-cols-2 gap-3 mt-4">
-                  <Button className="bg-gray-800 hover:bg-gray-700 text-gray-300">
-                    <Star className="h-4 w-4 mr-2" />
+                  <Button className="bg-gray-800 hover:bg-gray-700 text-gray-300 btn-micro hover-lift">
+                    <Star className="h-4 w-4 mr-2 icon-hover" />
                     Star
                   </Button>
-                  <Button className="bg-gray-800 hover:bg-gray-700 text-gray-300">
-                    <GitBranch className="h-4 w-4 mr-2" />
+                  <Button className="bg-gray-800 hover:bg-gray-700 text-gray-300 btn-micro hover-lift">
+                    <GitBranch className="h-4 w-4 mr-2 icon-hover" />
                     Fork
                   </Button>
                 </div>
@@ -579,7 +581,7 @@ export default function GitHubMobileLayout() {
                 value={repoName}
                 onChange={(e) => setRepoName(e.target.value)}
                 placeholder="my-awesome-project"
-                className="bg-gray-800 border-gray-700 text-white"
+                className="bg-gray-800 border-gray-700 text-white input-focus"
               />
             </div>
             <div>
@@ -588,7 +590,7 @@ export default function GitHubMobileLayout() {
                 value={repoDescription}
                 onChange={(e) => setRepoDescription(e.target.value)}
                 placeholder="A short description of your project"
-                className="bg-gray-800 border-gray-700 text-white"
+                className="bg-gray-800 border-gray-700 text-white input-focus"
               />
             </div>
             <div className="flex items-center space-x-2">
@@ -607,7 +609,7 @@ export default function GitHubMobileLayout() {
               <Button
                 variant="outline"
                 onClick={() => setCreateRepoOpen(false)}
-                className="border-gray-700 text-gray-300"
+                className="border-gray-700 text-gray-300 btn-micro"
               >
                 Cancel
               </Button>
@@ -622,7 +624,7 @@ export default function GitHubMobileLayout() {
                   setRepoDescription("");
                 }}
                 disabled={!repoName}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-green-600 hover:bg-green-700 btn-micro hover-lift"
               >
                 Create Repository
               </Button>
