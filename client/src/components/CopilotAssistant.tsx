@@ -46,6 +46,7 @@ export default function CopilotAssistant({
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [selectedText, setSelectedText] = useState("");
   const [cursorPosition, setCursorPosition] = useState(0);
+  const [analysis, setAnalysis] = useState<any>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-generate suggestions when code changes
@@ -87,6 +88,36 @@ export default function CopilotAssistant({
     }
   });
 
+  // Analyze code with AI
+  const analysisMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/ai/analyze", {
+        code,
+        language,
+        fileName
+      });
+      return response;
+    },
+    onSuccess: (data: any) => {
+      setAnalysis(data.analysis || null);
+    }
+  });
+
+  // Generate tests with AI
+  const testGenerationMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/ai/generate-tests", {
+        code,
+        language,
+        fileName
+      });
+      return response;
+    },
+    onSuccess: (data: any) => {
+      onInsertCode(data.testCode || "// No tests generated");
+    }
+  });
+
   const handleChatSubmit = () => {
     if (chatInput.trim()) {
       chatMutation.mutate(chatInput);
@@ -96,6 +127,19 @@ export default function CopilotAssistant({
   const handleInsertSuggestion = (suggestion: Suggestion) => {
     onInsertCode(suggestion.code, suggestion.startLine);
   };
+
+  // Auto-refresh analysis when code changes significantly
+  useEffect(() => {
+    if (analysis && code.length > 50) {
+      // Debounce analysis refresh to avoid too many API calls
+      const timer = setTimeout(() => {
+        if (code.length > analysis.lastAnalyzedLength + 100) {
+          setAnalysis(null); // Clear analysis to show refresh button
+        }
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [code, analysis]);
 
   // Mock suggestions for demo
   useEffect(() => {
@@ -149,6 +193,11 @@ export default function CopilotAssistant({
           <TabsTrigger value="analysis" className="text-xs">
             <FileText className="h-3 w-3 mr-1" />
             Analysis
+            {analysis && (
+              <Badge className="ml-1 h-4 text-xs bg-green-600">
+                ✓
+              </Badge>
+            )}
           </TabsTrigger>
         </TabsList>
 
@@ -270,62 +319,124 @@ export default function CopilotAssistant({
         <TabsContent value="analysis" className="flex-1 px-4">
           <ScrollArea className="h-full">
             <div className="space-y-4 py-2">
-              <Card className="bg-dark-bg border-dark-border">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm text-white">Code Quality</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-400">Overall Score</span>
-                    <Badge className="bg-green-600 text-white">
-                      85/100
-                    </Badge>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-400">Readability</span>
-                      <span className="text-white">Good</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-400">Performance</span>
-                      <span className="text-white">Excellent</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-400">Security</span>
-                      <span className="text-white">Good</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              {!analysis && code.length > 10 && (
+                <div className="text-center py-4">
+                  <Button
+                    onClick={() => analysisMutation.mutate()}
+                    disabled={analysisMutation.isPending}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {analysisMutation.isPending ? (
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+                    ) : (
+                      <Brain className="h-3 w-3 mr-2" />
+                    )}
+                    Analyze Code
+                  </Button>
+                </div>
+              )}
+
+              {analysis && (
+                <>
+                  <Card className="bg-dark-bg border-dark-border">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm text-white">Code Quality</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-400">Overall Score</span>
+                        <Badge className={`text-white ${
+                          (analysis.quality?.score || 0) >= 80 ? 'bg-green-600' :
+                          (analysis.quality?.score || 0) >= 60 ? 'bg-yellow-600' : 'bg-red-600'
+                        }`}>
+                          {analysis.quality?.score || 0}/100
+                        </Badge>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-400">Readability</span>
+                          <span className="text-white">{analysis.quality?.readability || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-400">Performance</span>
+                          <span className="text-white">{analysis.quality?.performance || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-400">Maintainability</span>
+                          <span className="text-white">{analysis.quality?.maintainability || 'N/A'}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-dark-bg border-dark-border">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm text-white">Complexity</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-400">Cyclomatic Complexity</span>
+                        <Badge className={`text-white ${
+                          analysis.complexity?.cyclomatic === 'Low' ? 'bg-green-600' :
+                          analysis.complexity?.cyclomatic === 'Medium' ? 'bg-yellow-600' : 'bg-red-600'
+                        }`}>
+                          {analysis.complexity?.cyclomatic || 'Unknown'}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {analysis.issues && analysis.issues.length > 0 && (
+                    <Card className="bg-dark-bg border-dark-border">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm text-white">Issues Found</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        {analysis.issues.map((issue: any, index: number) => (
+                          <div key={index} className="p-2 bg-gray-700 rounded text-xs">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="capitalize text-yellow-400">{issue.type}</span>
+                              <Badge className={`text-xs ${
+                                issue.severity === 'high' ? 'bg-red-600' :
+                                issue.severity === 'medium' ? 'bg-yellow-600' : 'bg-gray-600'
+                              }`}>
+                                {issue.severity}
+                              </Badge>
+                            </div>
+                            <p className="text-gray-300">{issue.message}</p>
+                            {issue.suggestion && (
+                              <p className="text-blue-400 mt-1">💡 {issue.suggestion}</p>
+                            )}
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              )}
 
               <Card className="bg-dark-bg border-dark-border">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm text-white">Complexity</CardTitle>
+                  <CardTitle className="text-sm text-white">AI Actions</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-400">Cyclomatic Complexity</span>
-                    <Badge className="bg-yellow-600 text-white">
-                      Medium
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-dark-bg border-dark-border">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm text-white">Test Coverage</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-400">Coverage</span>
-                    <Badge className="bg-orange-600 text-white">
-                      45%
-                    </Badge>
-                  </div>
-                  <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
-                    <TestTube className="h-3 w-3 mr-1" />
+                <CardContent className="space-y-2">
+                  <Button 
+                    size="sm" 
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    onClick={() => testGenerationMutation.mutate()}
+                    disabled={testGenerationMutation.isPending || code.length < 10}
+                  >
+                    {testGenerationMutation.isPending ? (
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+                    ) : (
+                      <TestTube className="h-3 w-3 mr-1" />
+                    )}
                     Generate Tests
+                  </Button>
+                  <Button size="sm" className="w-full bg-purple-600 hover:bg-purple-700">
+                    <FileText className="h-3 w-3 mr-1" />
+                    Generate Docs
                   </Button>
                 </CardContent>
               </Card>
