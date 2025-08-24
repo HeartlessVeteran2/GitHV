@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import rateLimit from "express-rate-limit";
 import { setupAuth, isAuthenticated } from "./githubAuth";
+import "./types"; // Load Express type augmentations
 
 // Rate limiter for GitHub API endpoints (max 10 requests per minute per user)
 const githubApiLimiter = rateLimit({
@@ -11,7 +12,7 @@ const githubApiLimiter = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.user?.id || req.ip,
+  keyGenerator: (req) => req.user?.id || req.ip || 'anonymous',
 });
 
 import { 
