@@ -60,6 +60,19 @@ describe('Rate Limiting Security', () => {
       expect(verifyRequestSignature(payload, null, secret)).toBe(false);
     });
 
+    test('should reject signatures with incorrect length', () => {
+      const secret = 'test-webhook-secret-123456789012';
+      const payload = JSON.stringify({ test: 'data' });
+
+      // Signature too short
+      const shortSignature = 'sha256=12345';
+      expect(verifyRequestSignature(payload, shortSignature, secret)).toBe(false);
+
+      // Signature too long
+      const longSignature = 'sha256=' + 'a'.repeat(128);
+      expect(verifyRequestSignature(payload, longSignature, secret)).toBe(false);
+    });
+
     test('should reject malformed signatures', () => {
       const secret = 'test-webhook-secret-123456789012';
       const payload = JSON.stringify({ test: 'data' });
