@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequestJson, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   GitPullRequest, GitBranch, Bug, Package, Star, GitFork, 
   Eye, Calendar, Users, Code, ExternalLink, Plus, Search,
@@ -18,30 +19,99 @@ interface GitHubDashboardProps {
   repo: string;
 }
 
+interface RepositoryStats {
+  repository: {
+    description: string;
+    stars: number;
+    forks: number;
+    watchers: number;
+    language: string;
+    size: number;
+    openIssues: number;
+    openPulls: number;
+    lastPush: string;
+    created_at: string;
+    updated_at: string;
+    default_branch: string;
+    license?: {
+      name: string;
+    };
+  };
+  contributors: Array<{
+    login: string;
+    avatar_url: string;
+    contributions: number;
+  }>;
+  languages: Record<string, number>;
+  recentActivity: Array<{
+    type: string;
+    actor: string;
+    created_at: string;
+    payload: any;
+  }>;
+  issues: Array<any>;
+}
+
+interface PullRequest {
+  id: number;
+  number: number;
+  title: string;
+  state: string;
+  user: {
+    login: string;
+    avatar_url: string;
+  };
+  created_at: string;
+  updated_at: string;
+  draft: boolean;
+  mergeable: boolean | null;
+  additions: number;
+  deletions: number;
+  changed_files: number;
+}
+
+interface Issue {
+  id: number;
+  number: number;
+  title: string;
+  state: string;
+  user: {
+    login: string;
+    avatar_url: string;
+  };
+  labels: Array<{
+    name: string;
+    color: string;
+  }>;
+  created_at: string;
+  updated_at: string;
+  comments: number;
+}
+
 export default function GitHubDashboard({ owner, repo }: GitHubDashboardProps) {
   const [activeTab, setActiveTab] = useState("overview");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch repository stats
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<RepositoryStats>({
     queryKey: ["/api/github", owner, repo, "stats"],
     retry: false
   });
 
   // Fetch pull requests
-  const { data: pullRequests } = useQuery({
+  const { data: pullRequests } = useQuery<PullRequest[]>({
     queryKey: ["/api/github", owner, repo, "pulls"],
     retry: false
   });
 
   // Fetch issues
-  const { data: issues } = useQuery({
+  const { data: issues } = useQuery<Issue[]>({
     queryKey: ["/api/github", owner, repo, "issues"],
     retry: false
   });
 
   // Fetch releases
-  const { data: releases } = useQuery({
+  const { data: releases } = useQuery<any[]>({
     queryKey: ["/api/github", owner, repo, "releases"],
     retry: false
   });
@@ -116,7 +186,7 @@ export default function GitHubDashboard({ owner, repo }: GitHubDashboardProps) {
                 <GitPullRequest className="h-5 w-5 text-green-500" />
                 <div>
                   <p className="text-sm text-gray-400">Open PRs</p>
-                  <p className="text-xl font-bold text-white">{pullRequests?.filter((pr: any) => pr.state === 'open').length || 0}</p>
+                  <p className="text-xl font-bold text-white">{pullRequests?.filter((pr) => pr.state === 'open').length || 0}</p>
                 </div>
               </div>
             </CardContent>
@@ -128,7 +198,7 @@ export default function GitHubDashboard({ owner, repo }: GitHubDashboardProps) {
                 <Bug className="h-5 w-5 text-red-500" />
                 <div>
                   <p className="text-sm text-gray-400">Open Issues</p>
-                  <p className="text-xl font-bold text-white">{stats.repository.issues}</p>
+                  <p className="text-xl font-bold text-white">{stats.repository.openIssues}</p>
                 </div>
               </div>
             </CardContent>
@@ -464,7 +534,7 @@ export default function GitHubDashboard({ owner, repo }: GitHubDashboardProps) {
                   {stats.repository.license && (
                     <div className="flex justify-between">
                       <span className="text-gray-400">License</span>
-                      <Badge variant="outline">{stats.repository.license}</Badge>
+                      <Badge variant="outline">{stats.repository.license.name}</Badge>
                     </div>
                   )}
                 </CardContent>

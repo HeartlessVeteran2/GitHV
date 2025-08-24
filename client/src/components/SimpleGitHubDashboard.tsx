@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   GitPullRequest, GitBranch, Bug, Package, Star, GitFork, 
   Eye, Users, Code, ExternalLink, Plus, Search, User
@@ -16,23 +17,68 @@ interface SimpleGitHubDashboardProps {
   repo: string;
 }
 
+interface RepositoryStats {
+  repository: {
+    description?: string;
+    stars: number;
+    forks: number;
+    watchers: number;
+    language: string;
+  };
+  contributors: Array<{
+    login: string;
+    avatar_url: string;
+    contributions: number;
+  }>;
+  languages?: Record<string, number>;
+  issues?: Array<any>;
+}
+
+interface PullRequest {
+  id: number;
+  number: number;
+  title: string;
+  state: string;
+  user: {
+    login: string;
+    avatar_url: string;
+  };
+  created_at: string;
+}
+
+interface Issue {
+  id: number;
+  number: number;
+  title: string;
+  state: string;
+  user: {
+    login: string;
+    avatar_url: string;
+  };
+  labels: Array<{
+    name: string;
+    color: string;
+  }>;
+  created_at: string;
+}
+
 export default function SimpleGitHubDashboard({ owner, repo }: SimpleGitHubDashboardProps) {
   const [activeTab, setActiveTab] = useState("overview");
 
   // Fetch repository stats
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<RepositoryStats>({
     queryKey: ["/api/github", owner, repo, "stats"],
     retry: false
   });
 
   // Fetch pull requests
-  const { data: pullRequests } = useQuery({
+  const { data: pullRequests } = useQuery<PullRequest[]>({
     queryKey: ["/api/github", owner, repo, "pulls"],
     retry: false
   });
 
   // Fetch issues
-  const { data: issues } = useQuery({
+  const { data: issues } = useQuery<Issue[]>({
     queryKey: ["/api/github", owner, repo, "issues"],
     retry: false
   });
@@ -80,7 +126,7 @@ export default function SimpleGitHubDashboard({ owner, repo }: SimpleGitHubDashb
                 <Bug className="h-5 w-5 text-red-500" />
                 <div>
                   <p className="text-sm text-gray-400">Open Issues</p>
-                  <p className="text-xl font-bold text-white">{stats.repository.issues}</p>
+                  <p className="text-xl font-bold text-white">{stats?.issues?.length || 0}</p>
                 </div>
               </div>
             </CardContent>
@@ -131,11 +177,11 @@ export default function SimpleGitHubDashboard({ owner, repo }: SimpleGitHubDashb
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {Object.entries(stats.languages)
+                    {stats?.languages && Object.entries(stats.languages)
                       .sort(([,a], [,b]) => (b as number) - (a as number))
                       .slice(0, 5)
                       .map(([lang, bytes]) => {
-                        const total = Object.values(stats.languages).reduce((sum: number, val) => sum + (val as number), 0);
+                        const total = Object.values(stats.languages!).reduce((sum: number, val) => sum + (val as number), 0);
                         const percentage = Math.round(((bytes as number) / total) * 100);
                         return (
                           <div key={lang} className="flex items-center justify-between">

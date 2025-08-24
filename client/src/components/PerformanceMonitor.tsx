@@ -57,7 +57,7 @@ export default function PerformanceMonitor() {
   const [resourceTimings, setResourceTimings] = useState<ResourceTiming[]>([]);
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [history, setHistory] = useState<{ timestamp: number; metrics: PerformanceMetrics }[]>([]);
-  const intervalRef = useRef<NodeJS.Timeout>();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Get initial performance metrics
