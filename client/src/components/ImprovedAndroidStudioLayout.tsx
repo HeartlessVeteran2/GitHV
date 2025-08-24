@@ -20,6 +20,7 @@ import SmartSearchBar from "./SmartSearchBar";
 import Terminal from "./Terminal";
 import GitIntegration from "./GitIntegration";
 import WebViewer from "./WebViewer";
+import CopilotAssistant from "./CopilotAssistant";
 import PerfectLoader from "./PerfectLoader";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useDeviceDetection } from "@/hooks/use-device-detection";
@@ -210,6 +211,15 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
               <Button
                 variant="ghost"
                 size="sm"
+                onClick={() => setAiPanelOpen(!aiPanelOpen)}
+                className="icon-btn-interactive ripple-effect"
+                title="Toggle AI Assistant"
+              >
+                <Bot className={`h-4 w-4 ${aiPanelOpen ? 'text-blue-400' : 'text-gray-400'}`} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                 className="icon-btn-interactive ripple-effect"
               >
@@ -303,7 +313,7 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
           )}
 
           {/* Main Editor Area */}
-          <ResizablePanel defaultSize={sidebarCollapsed ? 100 : 75}>
+          <ResizablePanel defaultSize={sidebarCollapsed ? (aiPanelOpen ? 70 : 100) : (aiPanelOpen ? 50 : 75)}>
             <ResizablePanelGroup direction="vertical">
               {/* Code Editor */}
               <ResizablePanel defaultSize={terminalCollapsed ? 100 : 70}>
@@ -392,6 +402,33 @@ export default function ImprovedAndroidStudioLayout({ onLogin }: ImprovedAndroid
               )}
             </ResizablePanelGroup>
           </ResizablePanel>
+          
+          {/* AI Assistant Panel */}
+          {aiPanelOpen && (
+            <>
+              <ResizableHandle />
+              <ResizablePanel defaultSize={30} minSize={25} maxSize={40}>
+                <CopilotAssistant
+                  code={currentCode}
+                  language={activeFile ? getLanguageFromPath(activeFile.path) : 'javascript'}
+                  fileName={activeFile?.path.split('/').pop()}
+                  onCodeChange={handleCodeChange}
+                  onInsertCode={(code, position) => {
+                    setCurrentCode(prev => {
+                      const lines = prev.split('\n');
+                      if (position && position > 0 && position <= lines.length) {
+                        lines.splice(position - 1, 0, code);
+                      } else {
+                        lines.push(code);
+                      }
+                      return lines.join('\n');
+                    });
+                    toast({ title: "Code Inserted", description: "AI suggestion applied" });
+                  }}
+                />
+              </ResizablePanel>
+            </>
+          )}
         </ResizablePanelGroup>
       </div>
 
