@@ -445,7 +445,7 @@ export default function GitHubMobileLayout() {
               <TabsContent value="issues" className="mt-4">
                 <Card className="bg-gray-900 border-gray-800">
                   <CardContent className="p-4 text-center">
-                    <Issues className="h-12 w-12 text-gray-600 mx-auto mb-2" />
+                    <CircleDot className="h-12 w-12 text-gray-600 mx-auto mb-2" />
                     <p className="text-gray-400">No open issues</p>
                     <Button className="mt-3 bg-green-600 hover:bg-green-700">
                       New Issue

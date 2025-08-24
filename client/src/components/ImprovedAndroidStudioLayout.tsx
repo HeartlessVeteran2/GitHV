@@ -23,7 +23,6 @@ import WebViewer from "./WebViewer";
 import PerfectLoader from "./PerfectLoader";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useDeviceDetection } from "@/hooks/use-device-detection";
-// import MobileGestures from "./MobileGestures";
 import type { Repository, File as FileType } from "@shared/schema";
 
 interface ImprovedAndroidStudioLayoutProps {
