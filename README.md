@@ -46,7 +46,7 @@ A streamlined, tablet-optimized web-based IDE designed as a personal development
 ### Backend
 - **Express.js** with TypeScript
 - **Drizzle ORM** with PostgreSQL
-- **Replit Authentication** (OpenID Connect)
+- **GitHub OAuth** authentication
 - **WebSocket** support for real-time features
 - **Gemini AI** integration
 
@@ -54,7 +54,7 @@ A streamlined, tablet-optimized web-based IDE designed as a personal development
 - **PostgreSQL** database with Neon hosting
 - **Session management** with PostgreSQL store
 - **GitHub API** integration for repository access
-- **Replit Deployments** for hosting
+- **Self-hosted** deployment options
 
 ### Development Tools
 - **ESLint & Prettier** for code quality
@@ -90,7 +90,8 @@ A streamlined, tablet-optimized web-based IDE designed as a personal development
    
    # Authentication
    SESSION_SECRET=your-session-secret
-   REPL_ID=your-replit-app-id
+   GITHUB_CLIENT_ID=your-github-client-id
+   GITHUB_CLIENT_SECRET=your-github-client-secret
    
    # AI Integration
    GEMINI_API_KEY=your-gemini-api-key
@@ -159,11 +160,6 @@ Configure AI personalities and behavior:
 
 ## 🚀 Deployment
 
-### Replit Deployment (Recommended)
-1. Connect your GitHub repository to Replit
-2. Configure environment variables in Replit Secrets
-3. Deploy using Replit's one-click deployment
-
 ### Manual Deployment
 1. Build the application:
    ```bash
@@ -171,15 +167,27 @@ Configure AI personalities and behavior:
    ```
 
 2. Set production environment variables
-3. Deploy to your preferred hosting platform
+3. Deploy to your preferred hosting platform (Vercel, Netlify, Railway, etc.)
+
+### Docker Deployment
+1. Build the Docker image:
+   ```bash
+   docker build -t githv .
+   ```
+
+2. Run the container:
+   ```bash
+   docker run -p 5000:5000 --env-file .env githv
+   ```
 
 ## 📖 API Documentation
 
 ### Authentication
-Uses Replit's OpenID Connect for secure authentication:
-- `/api/login` - Initiate login flow
+Uses GitHub OAuth for secure authentication:
+- `/api/login` - Initiate GitHub OAuth login flow
 - `/api/logout` - Logout and clear session
 - `/api/auth/user` - Get current user info
+- `/api/auth/github/callback` - GitHub OAuth callback
 
 ### File Operations
 - `GET /api/repositories` - List user repositories
@@ -214,7 +222,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Replit** for authentication and hosting platform
+- **GitHub** for OAuth authentication and API integration
 - **Google** for Gemini AI integration
 - **Microsoft** for Monaco Editor
 - **Vercel** for shadcn/ui components
@@ -223,9 +231,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 For support and questions:
-- Check the [Issues](https://github.com/yourusername/githv/issues) page
+- Check the [Issues](https://github.com/Heartless-Veteran/GitHV/issues) page
 - Create a new issue for bug reports or feature requests
-- Contact support through Replit platform
+- Review documentation and configuration guides
 
 ---
 
