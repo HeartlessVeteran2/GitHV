@@ -3,6 +3,7 @@ import { Strategy as GitHubStrategy } from "passport-github2";
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
+import lusca from "lusca";
 import { storage } from "./storage";
 
 if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
@@ -29,6 +30,11 @@ export function getSession() {
       maxAge: sessionTtl,
     },
   });
+}
+
+
+export function getCsrfProtection() {
+  return lusca.csrf();
 }
 
 interface GitHubProfile {
