@@ -14,6 +14,9 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().optional(),
   RATE_LIMIT_WINDOW_MS: z.string().default('900000').transform((val) => parseInt(val, 10)), // 15 minutes
   RATE_LIMIT_MAX_REQUESTS: z.string().default('100').transform((val) => parseInt(val, 10)),
+  // Webhook security
+  WEBHOOK_SECRET: z.string().min(32, 'Webhook secret must be at least 32 characters').optional(),
+  API_SECRET: z.string().min(32, 'API secret must be at least 32 characters').optional(),
 });
 
 export type Environment = z.infer<typeof envSchema>;
