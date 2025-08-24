@@ -65,7 +65,7 @@ export const generalApiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   // Add jitter to prevent thundering herd
-  skipFailedRequests: true,
+  skipFailedRequests: false,
   skipSuccessfulRequests: false,
 });
 
