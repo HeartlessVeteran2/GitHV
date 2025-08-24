@@ -2,7 +2,18 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import rateLimit from "express-rate-limit";
+import { setupAuth, isAuthenticated } from "./githubAuth";
+
+// Rate limiter for GitHub API endpoints (max 10 requests per minute per user)
+const githubApiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.user?.id || req.ip,
+});
+
 import { 
   generateCodeCompletion, 
   analyzeCode, 
@@ -17,6 +28,16 @@ import aiRoutes from "./routes/ai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
+
+  // Rate limiter middleware for authenticated GitHub API endpoints
+  const githubApiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 60, // limit each user to 60 requests per windowMs
+    keyGenerator: (req: any) => req?.user?.id || req.ip, // per-user if authenticated, fallback to IP
+    message: "Too many requests from this user, please try again later.",
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
   await setupAuth(app);
 
   // Health check endpoint
@@ -34,7 +55,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -43,56 +64,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // GitHub OAuth integration
-  app.get('/api/auth/github', isAuthenticated, async (req: any, res) => {
-    const githubAuthUrl = `https://github.com/login/oauth/authorize?` +
-      `client_id=${process.env.GITHUB_CLIENT_ID}&` +
-      `redirect_uri=${encodeURIComponent(`${req.protocol}://${req.hostname}/api/auth/github/callback`)}&` +
-      `scope=repo,user:email,read:org`;
-    res.redirect(githubAuthUrl);
-  });
-
-  app.get('/api/auth/github/callback', isAuthenticated, async (req: any, res) => {
-    try {
-      const { code } = req.query;
-      if (!code) {
-        return res.redirect('/?error=github_auth_failed');
-      }
-
-      // Exchange code for access token
-      const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          client_id: process.env.GITHUB_CLIENT_ID,
-          client_secret: process.env.GITHUB_CLIENT_SECRET,
-          code,
-        }),
-      });
-
-      const tokenData = await tokenResponse.json();
-      
-      if (tokenData.access_token) {
-        // Update user with GitHub access token
-        const userId = req.user.claims.sub;
-        await storage.updateUser(userId, { githubAccessToken: tokenData.access_token });
-        res.redirect('/?github_connected=true');
-      } else {
-        res.redirect('/?error=github_token_failed');
-      }
-    } catch (error) {
-      console.error('GitHub OAuth error:', error);
-      res.redirect('/?error=github_auth_error');
-    }
-  });
 
   // Repository routes
   app.get('/api/repositories', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const repositories = await storage.getUserRepositories(userId);
       res.json(repositories);
     } catch (error) {
@@ -119,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/repositories/sync', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user?.githubAccessToken) {
@@ -201,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Repository not found" });
       }
 
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user?.githubAccessToken) {
@@ -434,7 +410,7 @@ Provide a helpful, accurate response about the code or programming question.
   // Enhanced GitHub API endpoints
   app.get("/api/github/user", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user?.githubAccessToken) {
@@ -454,7 +430,7 @@ Provide a helpful, accurate response about the code or programming question.
     try {
       const { owner, repo } = req.params;
       const { state = 'open' } = req.query;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user?.githubAccessToken) {
@@ -470,11 +446,11 @@ Provide a helpful, accurate response about the code or programming question.
     }
   });
 
-  app.get("/api/github/:owner/:repo/issues", isAuthenticated, async (req: any, res) => {
+  app.get("/api/github/:owner/:repo/issues", isAuthenticated, githubApiLimiter, async (req: any, res) => {
     try {
       const { owner, repo } = req.params;
       const { state = 'open' } = req.query;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user?.githubAccessToken) {
@@ -490,10 +466,10 @@ Provide a helpful, accurate response about the code or programming question.
     }
   });
 
-  app.get("/api/github/:owner/:repo/releases", isAuthenticated, async (req: any, res) => {
+  app.get("/api/github/:owner/:repo/releases", isAuthenticated, githubApiLimiter, async (req: any, res) => {
     try {
       const { owner, repo } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user?.githubAccessToken) {
@@ -509,10 +485,10 @@ Provide a helpful, accurate response about the code or programming question.
     }
   });
 
-  app.get("/api/github/:owner/:repo/stats", isAuthenticated, async (req: any, res) => {
+  app.get("/api/github/:owner/:repo/stats", isAuthenticated, githubApiLimiter, async (req: any, res) => {
     try {
       const { owner, repo } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user?.githubAccessToken) {
@@ -532,7 +508,7 @@ Provide a helpful, accurate response about the code or programming question.
     try {
       const { owner, repo } = req.params;
       const { branchName, fromBranch } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user?.githubAccessToken) {
@@ -552,7 +528,7 @@ Provide a helpful, accurate response about the code or programming question.
     try {
       const { owner, repo } = req.params;
       const { title, body, head, base } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user?.githubAccessToken) {
@@ -572,7 +548,7 @@ Provide a helpful, accurate response about the code or programming question.
     try {
       const { owner, repo } = req.params;
       const { title, body, labels } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user?.githubAccessToken) {
@@ -591,7 +567,7 @@ Provide a helpful, accurate response about the code or programming question.
   app.get("/api/github/search/repositories", isAuthenticated, async (req: any, res) => {
     try {
       const { q, sort } = req.query;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       
       if (!user?.githubAccessToken) {
@@ -604,6 +580,110 @@ Provide a helpful, accurate response about the code or programming question.
     } catch (error) {
       console.error("Error searching repositories:", error);
       res.status(500).json({ message: "Failed to search repositories" });
+    }
+  });
+
+  // Get repository commits
+  app.get("/api/github/:owner/:repo/commits", isAuthenticated, githubApiLimiter, async (req: any, res) => {
+    try {
+      const { owner, repo } = req.params;
+      const { sha } = req.query;
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      const commits = await github.getCommits(owner, repo, sha);
+      res.json(commits);
+    } catch (error) {
+      console.error("Error fetching commits:", error);
+      res.status(500).json({ message: "Failed to fetch commits" });
+    }
+  });
+
+  // Get repository branches  
+  app.get("/api/github/:owner/:repo/branches", isAuthenticated, githubApiLimiter, async (req: any, res) => {
+    try {
+      const { owner, repo } = req.params;
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      const branches = await github.getBranches(owner, repo);
+      res.json(branches);
+    } catch (error) {
+      console.error("Error fetching branches:", error);
+      res.status(500).json({ message: "Failed to fetch branches" });
+    }
+  });
+
+  // Get file content from repository
+  app.get("/api/github/:owner/:repo/contents/*", isAuthenticated, githubApiLimiter, async (req: any, res) => {
+    try {
+      const { owner, repo } = req.params;
+      const path = req.params[0] || "";
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      
+      if (path) {
+        // Get specific file content
+        const fileContent = await github.getFileContent(owner, repo, path);
+        res.json(fileContent);
+      } else {
+        // Get repository contents (directory listing)
+        const contents = await github.getRepositoryContents(owner, repo);
+        res.json(contents);
+      }
+    } catch (error) {
+      console.error("Error fetching repository contents:", error);
+      res.status(500).json({ message: "Failed to fetch repository contents" });
+    }
+  });
+
+  // Update file in repository
+  app.put("/api/github/:owner/:repo/contents/*", isAuthenticated, githubApiLimiter, async (req: any, res) => {
+    try {
+      const { owner, repo } = req.params;
+      const path = req.params[0];
+      const { content, message, sha } = req.body;
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      if (!path || !content || !message) {
+        return res.status(400).json({ message: "Path, content, and commit message are required" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      
+      if (sha) {
+        // Update existing file
+        const result = await github.updateFile(owner, repo, path, content, sha, message);
+        res.json(result);
+      } else {
+        // Create new file
+        const result = await github.createFile(owner, repo, path, content, message);
+        res.json(result);
+      }
+    } catch (error) {
+      console.error("Error updating file:", error);
+      res.status(500).json({ message: "Failed to update file" });
     }
   });
 
