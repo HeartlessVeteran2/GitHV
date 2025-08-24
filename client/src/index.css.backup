@@ -56,8 +56,7 @@
   
   /* Menu item interactions */
   .menu-item-interactive {
-    @apply transition-all duration-150;
-    transition-timing-function: var(--ease-out);
+    @apply transition-all duration-150 ease-out;
     @apply hover:bg-gray-100 dark:hover:bg-gray-700;
     @apply hover:translate-x-1 hover:shadow-sm;
     @apply active:translate-x-0 active:scale-[0.99];
@@ -72,8 +71,7 @@
   
   /* Tab interactions */
   .tab-interactive {
-    @apply transition-all duration-200;
-    transition-timing-function: var(--ease-out);
+    @apply transition-all duration-200 ease-out;
     @apply hover:bg-gray-100 dark:hover:bg-gray-700;
     @apply hover:scale-[1.02] hover:shadow-sm;
     @apply data-[state=active]:bg-gray-200 dark:data-[state=active]:bg-gray-600;
@@ -82,8 +80,7 @@
   
   /* Icon button interactions */
   .icon-btn-interactive {
-    @apply transition-all duration-150;
-    transition-timing-function: var(--ease-out);
+    @apply transition-all duration-150 ease-out;
     @apply hover:scale-110 hover:rotate-6;
     @apply active:scale-95 active:rotate-0;
     @apply hover:shadow-md;
@@ -91,8 +88,7 @@
   
   /* Card interactions */
   .card-interactive {
-    @apply transition-all duration-250;
-    transition-timing-function: var(--ease-out);
+    @apply transition-all duration-250 ease-out;
     @apply hover:shadow-lg hover:shadow-gray-200/50;
     @apply dark:hover:shadow-gray-900/50;
     @apply hover:scale-[1.01] hover:-translate-y-1;
@@ -101,8 +97,7 @@
   
   /* Input interactions */
   .input-interactive {
-    @apply transition-all duration-200;
-    transition-timing-function: var(--ease-out);
+    @apply transition-all duration-200 ease-out;
     @apply hover:border-gray-400 dark:hover:border-gray-500;
     @apply focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20;
     @apply focus:scale-[1.01] focus:shadow-md;
@@ -127,8 +122,7 @@
   
   /* File explorer item interactions */
   .file-item-interactive {
-    @apply transition-all duration-150;
-    transition-timing-function: var(--ease-out);
+    @apply transition-all duration-150 ease-out;
     @apply hover:bg-blue-50 dark:hover:bg-blue-900/20;
     @apply hover:translate-x-2 hover:border-l-2 hover:border-blue-500;
     @apply active:translate-x-1 active:scale-[0.99];
@@ -137,8 +131,7 @@
   
   .file-item-interactive:hover .file-icon {
     @apply transform scale-110 rotate-3;
-    @apply transition-transform duration-150;
-    transition-timing-function: var(--ease-out);
+    @apply transition-transform duration-150 ease-out;
   }
   
   /* Sidebar panel interactions */
@@ -150,8 +143,7 @@
   
   /* Search bar interactions */
   .search-interactive {
-    @apply transition-all duration-200;
-    transition-timing-function: var(--ease-out);
+    @apply transition-all duration-200 ease-out;
     @apply hover:shadow-md hover:shadow-blue-500/10;
     @apply focus-within:shadow-lg focus-within:shadow-blue-500/20;
     @apply focus-within:scale-[1.02] focus-within:border-blue-500;
@@ -181,8 +173,7 @@
   .ripple-effect::after {
     @apply content-[''] absolute top-1/2 left-1/2;
     @apply w-0 h-0 rounded-full bg-white/30;
-    @apply transition-all duration-300;
-    transition-timing-function: var(--ease-out);
+    @apply transition-all duration-300 ease-out;
     @apply transform -translate-x-1/2 -translate-y-1/2;
     @apply pointer-events-none;
   }
@@ -195,7 +186,7 @@
   /* Stagger animations for lists */
   .stagger-item {
     @apply opacity-0 translate-y-4;
-    animation: staggerFadeIn 0.3s var(--ease-out) forwards;
+    animation: staggerFadeIn 0.3s ease-out forwards;
   }
   
   .stagger-item:nth-child(1) { animation-delay: 0ms; }
@@ -256,8 +247,7 @@
 
 /* Smooth transitions for all interactive elements */
 button, a, [role="button"] {
-  @apply transition-all duration-200;
-    transition-timing-function: var(--ease-out);
+  @apply transition-all duration-200 ease-out;
 }
 
 /* Premium button styles */
@@ -274,7 +264,7 @@ button, a, [role="button"] {
 
 /* Smooth page transitions */
 .page-transition {
-  animation: pageEnter 0.3s var(--ease-out);
+  animation: pageEnter 0.3s ease-out;
 }
 
 @keyframes pageEnter {
@@ -310,8 +300,7 @@ button, a, [role="button"] {
 
 /* Advanced micro-interactions */
 .hover-lift {
-  @apply transition-all duration-200;
-    transition-timing-function: var(--ease-out);
+  @apply transition-all duration-200 ease-out;
 }
 
 .hover-lift:hover {
@@ -320,8 +309,7 @@ button, a, [role="button"] {
 }
 
 .hover-scale {
-  @apply transition-transform duration-200;
-    transition-timing-function: var(--ease-out);
+  @apply transition-transform duration-200 ease-out;
 }
 
 .hover-scale:hover {
@@ -329,8 +317,7 @@ button, a, [role="button"] {
 }
 
 .hover-glow {
-  @apply transition-all duration-300;
-    transition-timing-function: var(--ease-out);
+  @apply transition-all duration-300 ease-out;
 }
 
 .hover-glow:hover {
@@ -345,7 +332,7 @@ button, a, [role="button"] {
 .btn-micro::before {
   content: '';
   @apply absolute inset-0 bg-white/10 transform -translate-x-full;
-  transition: transform 0.3s var(--ease-out);
+  transition: transform 0.3s ease-out;
 }
 
 .btn-micro:hover::before {
@@ -364,7 +351,7 @@ button, a, [role="button"] {
 .menu-micro::after {
   content: '';
   @apply absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-500;
-  transition: width 0.3s var(--ease-out);
+  transition: width 0.3s ease-out;
 }
 
 .menu-micro:hover::after {
@@ -389,8 +376,7 @@ button, a, [role="button"] {
 
 /* Icon button animations */
 .icon-hover {
-  @apply transition-all duration-200;
-    transition-timing-function: var(--ease-out);
+  @apply transition-all duration-200 ease-out;
 }
 
 .icon-hover:hover {
@@ -444,7 +430,7 @@ button, a, [role="button"] {
   content: '';
   @apply absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent;
   transform: scaleX(0);
-  transition: transform 0.3s var(--ease-out);
+  transition: transform 0.3s ease-out;
 }
 
 .tab-hover:hover::before {
@@ -521,11 +507,11 @@ html {
 }
 
 .slide-in-right {
-  animation: slideInRight 0.3s var(--ease-out);
+  animation: slideInRight 0.3s ease-out;
 }
 
 .slide-in-left {
-  animation: slideInLeft 0.3s var(--ease-out);
+  animation: slideInLeft 0.3s ease-out;
 }
 
 /* Accessibility improvements */
@@ -692,11 +678,11 @@ html {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s var(--ease-out);
+  animation: fadeIn 0.3s ease-out;
 }
 
 .animate-slide-in {
-  animation: slideIn 0.3s var(--ease-out);
+  animation: slideIn 0.3s ease-out;
 }
 
 .animate-glow {
