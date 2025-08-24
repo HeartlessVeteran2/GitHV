@@ -23,7 +23,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const githubApiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 60, // limit each user to 60 requests per windowMs
-    keyGenerator: (req) => req?.user?.id || req.ip, // per-user if authenticated, fallback to IP
+    keyGenerator: (req: any) => req?.user?.id || req.ip, // per-user if authenticated, fallback to IP
     message: "Too many requests from this user, please try again later.",
     standardHeaders: true,
     legacyHeaders: false,
