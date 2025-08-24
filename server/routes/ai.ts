@@ -1,5 +1,12 @@
 import { Router } from "express";
 import { isAuthenticated } from "../githubAuth";
+import rateLimit from "express-rate-limit";
+
+const analyzeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Too many requests to /analyze, please try again later."
+});
 
 const router = Router();
 
@@ -124,7 +131,7 @@ Respond only with the JSON array, no other text.`;
 });
 
 // AI Code Analysis endpoint  
-router.post('/analyze', isAuthenticated, async (req, res) => {
+router.post('/analyze', isAuthenticated, analyzeLimiter, async (req, res) => {
   try {
     const { code, language, fileName } = req.body;
 
