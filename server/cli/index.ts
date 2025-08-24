@@ -19,12 +19,26 @@ const cliLimiter = rateLimit({
 const router = Router();
 
 // Execute CLI commands
+/**
+ * Basic sanitization to prevent command injection.
+ * Disallow dangerous shell metacharacters and patterns.
+ */
+function isSafeCommand(cmd: string): boolean {
+  // Disallow ;, &&, ||, |, $, `, >, <, \n, \r, and excessive whitespace
+  const unsafePattern = /(;|&&|\|\||\||\$|`|>|<|\n|\r)/;
+  return !unsafePattern.test(cmd);
+}
+
 router.post('/execute', isAuthenticated, cliLimiter, async (req, res) => {
   try {
     const { command, code, language, fileName, instructions } = req.body;
-    
+
     if (!command || typeof command !== 'string') {
       return res.status(400).json({ error: 'Command is required' });
+    }
+
+    if (!isSafeCommand(command)) {
+      return res.status(400).json({ error: 'Unsafe command detected. Command contains forbidden characters or patterns.' });
     }
 
     const commandLower = command.trim().toLowerCase();
