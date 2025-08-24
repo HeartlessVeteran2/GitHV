@@ -8,6 +8,12 @@ const analyzeLimiter = rateLimit({
   message: "Too many requests to /analyze, please try again later."
 });
 
+const generateTestsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Too many requests to /generate-tests, please try again later."
+});
+
 const router = Router();
 
 // AI Chat endpoint
@@ -215,7 +221,7 @@ Respond with JSON in this format:
 });
 
 // AI Test Generation endpoint
-router.post('/generate-tests', isAuthenticated, async (req, res) => {
+router.post('/generate-tests', isAuthenticated, generateTestsLimiter, async (req, res) => {
   try {
     const { code, language, fileName } = req.body;
 
