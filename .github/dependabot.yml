@@ -7,41 +7,20 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "02:00"
-    open-pull-requests-limit: 10
-    reviewers:
-      - "@me" # Replace with your GitHub username
-    assignees:
-      - "@me" # Replace with your GitHub username
+    open-pull-requests-limit: 5
     commit-message:
       prefix: "chore"
-      prefix-development: "chore"
       include: "scope"
     labels:
       - "dependencies"
-      - "automated"
-    
-  # Security updates only for critical vulnerabilities
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 5
-    target-branch: "security-updates"
-    reviewers:
-      - "@me"
-    labels:
-      - "security"
-      - "high-priority"
     
   # GitHub Actions updates
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "sunday"
-    open-pull-requests-limit: 5
+      interval: "monthly"
+    open-pull-requests-limit: 3
     commit-message:
       prefix: "ci"
     labels:
       - "github-actions"
-      - "ci/cd"
