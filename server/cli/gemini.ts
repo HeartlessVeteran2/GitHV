@@ -124,9 +124,7 @@ export async function executeGeminiCommand(
         };
 
       case 'version':
-        return {
-          success: true,
-          output: 'Gemini CLI v1.0.0 (Powered by Gemini 2.5 Pro)'
+          output: GEMINI_CLI_VERSION
         };
 
       default:
