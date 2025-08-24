@@ -326,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate code completion suggestion
       if (code.trim()) {
         try {
-          const completion = await generateCodeCompletion(code, language, `File: ${fileName}\nCursor at position: ${cursorPosition}\nSelected text: ${selectedText}`);
+          const completion = await generateCodeCompletion(code, language, cursorPosition || { line: 1, column: 1 });
           if (completion) {
             suggestions.push({
               id: `completion-${Date.now()}`,
@@ -367,7 +367,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               type: 'fix',
               title: 'Bug Fix',
               description: `Found ${analysis.issues.length} potential issues`,
-              code: `// Issues found:\n${analysis.issues.map((issue: string) => `// - ${issue}`).join('\n')}\n\n${code}`,
+              code: `// Issues found:\n${analysis.issues.map((issue) => `// - Line ${issue.line}: ${issue.message}`).join('\n')}\n\n${code}`,
               confidence: 0.70
             });
           }

@@ -137,9 +137,11 @@ export default function CodeEditor({
         },
         text: code
       }]);
+      const lines = code.split('\n');
+      const lastLine = lines[lines.length - 1];
       editor.setPosition({
-        lineNumber: position.lineNumber + code.split('\n').length - 1,
-        column: code.split('\n').pop()?.length + 1 || position.column
+        lineNumber: position.lineNumber + lines.length - 1,
+        column: lastLine ? lastLine.length + 1 : position.column
       });
     }
   };

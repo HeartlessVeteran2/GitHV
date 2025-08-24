@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequestJson } from "@/lib/queryClient";
 import { Editor } from "@monaco-editor/react";
+import * as monaco from 'monaco-editor';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,6 +34,28 @@ interface CodeAnalysis {
   suggestions: string[];
 }
 
+interface AISuggestion {
+  code: string;
+  explanation: string;
+  confidence: number;
+}
+
+interface DocumentationResponse {
+  documentation: string;
+}
+
+interface ExplanationResponse {
+  explanation: string;
+}
+
+interface TestsResponse {
+  tests: string;
+}
+
+interface RefactorResponse {
+  refactoredCode: string;
+}
+
 export default function AIPoweredCodeEditor({ 
   code, 
   language, 
@@ -43,7 +66,7 @@ export default function AIPoweredCodeEditor({
   const [cursorPosition, setCursorPosition] = useState({ line: 1, column: 1 });
   const [activeTab, setActiveTab] = useState("code");
   const [analysis, setAnalysis] = useState<CodeAnalysis | null>(null);
-  const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
+  const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
   const [documentation, setDocumentation] = useState("");
   const [explanation, setExplanation] = useState("");
   const [tests, setTests] = useState("");
@@ -51,8 +74,8 @@ export default function AIPoweredCodeEditor({
 
   // AI-powered code completion
   const codeCompletionMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest("POST", "/api/ai/code-completion", {
+    mutationFn: async (): Promise<{ suggestions: AISuggestion[] }> => {
+      return apiRequestJson("POST", "/api/ai/code-completion", {
         code,
         language,
         cursorPosition
@@ -65,8 +88,8 @@ export default function AIPoweredCodeEditor({
 
   // Code analysis
   const analyzeCodeMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest("POST", "/api/ai/analyze-code", {
+    mutationFn: async (): Promise<CodeAnalysis> => {
+      return apiRequestJson("POST", "/api/ai/analyze-code", {
         code,
         language
       });
@@ -78,8 +101,8 @@ export default function AIPoweredCodeEditor({
 
   // Generate documentation
   const generateDocsMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest("POST", "/api/ai/generate-docs", {
+    mutationFn: async (): Promise<DocumentationResponse> => {
+      return apiRequestJson("POST", "/api/ai/generate-docs", {
         code,
         language
       });
@@ -91,8 +114,8 @@ export default function AIPoweredCodeEditor({
 
   // Explain code
   const explainCodeMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest("POST", "/api/ai/explain-code", {
+    mutationFn: async (): Promise<ExplanationResponse> => {
+      return apiRequestJson("POST", "/api/ai/explain-code", {
         code,
         language
       });
@@ -104,8 +127,8 @@ export default function AIPoweredCodeEditor({
 
   // Generate tests
   const generateTestsMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest("POST", "/api/ai/generate-tests", {
+    mutationFn: async (): Promise<TestsResponse> => {
+      return apiRequestJson("POST", "/api/ai/generate-tests", {
         code,
         language
       });
@@ -117,8 +140,8 @@ export default function AIPoweredCodeEditor({
 
   // Refactor code
   const refactorCodeMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest("POST", "/api/ai/refactor-code", {
+    mutationFn: async (): Promise<RefactorResponse> => {
+      return apiRequestJson("POST", "/api/ai/refactor-code", {
         code,
         language,
         instructions: refactorInstructions
@@ -213,8 +236,8 @@ export default function AIPoweredCodeEditor({
               });
             });
 
-            // AI completion shortcut
-            editor.addCommand(editor.KeyMod.CtrlCmd | editor.KeyCode.Space, () => {
+            // AI completion shortcut  
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {
               codeCompletionMutation.mutate();
             });
           }}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequestJson } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -70,8 +70,8 @@ export default function FloatingAIAssistant({
 
   // Auto-generate suggestions based on context
   const suggestionsMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/ai/code-suggestions", {
+    mutationFn: async (): Promise<{ suggestions: Suggestion[] }> => {
+      return apiRequestJson("POST", "/api/ai/code-suggestions", {
         code,
         language,
         fileName,
@@ -79,7 +79,6 @@ export default function FloatingAIAssistant({
         selectedText,
         personality: currentPersonality.prompt
       });
-      return response as { suggestions: Suggestion[] };
     },
     onSuccess: (data) => {
       setSuggestions(data.suggestions || []);
@@ -97,8 +96,8 @@ export default function FloatingAIAssistant({
 
   // Chat with AI
   const chatMutation = useMutation({
-    mutationFn: async (message: string) => {
-      const response = await apiRequest("POST", "/api/ai/chat", {
+    mutationFn: async (message: string): Promise<{ response: string }> => {
+      return apiRequestJson("POST", "/api/ai/chat", {
         message,
         code,
         language,
@@ -106,7 +105,6 @@ export default function FloatingAIAssistant({
         history: chatMessages,
         personality: currentPersonality.prompt
       });
-      return response as { response: string };
     },
     onSuccess: (data) => {
       setChatMessages(prev => [
