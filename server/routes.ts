@@ -4,6 +4,16 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import rateLimit from "express-rate-limit";
 import { setupAuth, isAuthenticated } from "./githubAuth";
+
+// Rate limiter for GitHub API endpoints (max 10 requests per minute per user)
+const githubApiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.user?.id || req.ip,
+});
+
 import { 
   generateCodeCompletion, 
   analyzeCode, 
@@ -23,7 +33,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const githubApiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 60, // limit each user to 60 requests per windowMs
-    keyGenerator: (req) => req?.user?.id || req.ip, // per-user if authenticated, fallback to IP
+    keyGenerator: (req: any) => req?.user?.id || req.ip, // per-user if authenticated, fallback to IP
     message: "Too many requests from this user, please try again later.",
     standardHeaders: true,
     legacyHeaders: false,
@@ -570,6 +580,110 @@ Provide a helpful, accurate response about the code or programming question.
     } catch (error) {
       console.error("Error searching repositories:", error);
       res.status(500).json({ message: "Failed to search repositories" });
+    }
+  });
+
+  // Get repository commits
+  app.get("/api/github/:owner/:repo/commits", isAuthenticated, githubApiLimiter, async (req: any, res) => {
+    try {
+      const { owner, repo } = req.params;
+      const { sha } = req.query;
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      const commits = await github.getCommits(owner, repo, sha);
+      res.json(commits);
+    } catch (error) {
+      console.error("Error fetching commits:", error);
+      res.status(500).json({ message: "Failed to fetch commits" });
+    }
+  });
+
+  // Get repository branches  
+  app.get("/api/github/:owner/:repo/branches", isAuthenticated, githubApiLimiter, async (req: any, res) => {
+    try {
+      const { owner, repo } = req.params;
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      const branches = await github.getBranches(owner, repo);
+      res.json(branches);
+    } catch (error) {
+      console.error("Error fetching branches:", error);
+      res.status(500).json({ message: "Failed to fetch branches" });
+    }
+  });
+
+  // Get file content from repository
+  app.get("/api/github/:owner/:repo/contents/*", isAuthenticated, githubApiLimiter, async (req: any, res) => {
+    try {
+      const { owner, repo } = req.params;
+      const path = req.params[0] || "";
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      
+      if (path) {
+        // Get specific file content
+        const fileContent = await github.getFileContent(owner, repo, path);
+        res.json(fileContent);
+      } else {
+        // Get repository contents (directory listing)
+        const contents = await github.getRepositoryContents(owner, repo);
+        res.json(contents);
+      }
+    } catch (error) {
+      console.error("Error fetching repository contents:", error);
+      res.status(500).json({ message: "Failed to fetch repository contents" });
+    }
+  });
+
+  // Update file in repository
+  app.put("/api/github/:owner/:repo/contents/*", isAuthenticated, githubApiLimiter, async (req: any, res) => {
+    try {
+      const { owner, repo } = req.params;
+      const path = req.params[0];
+      const { content, message, sha } = req.body;
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.githubAccessToken) {
+        return res.status(400).json({ message: "GitHub access token not found" });
+      }
+
+      if (!path || !content || !message) {
+        return res.status(400).json({ message: "Path, content, and commit message are required" });
+      }
+
+      const github = new GitHubService(user.githubAccessToken);
+      
+      if (sha) {
+        // Update existing file
+        const result = await github.updateFile(owner, repo, path, content, sha, message);
+        res.json(result);
+      } else {
+        // Create new file
+        const result = await github.createFile(owner, repo, path, content, message);
+        res.json(result);
+      }
+    } catch (error) {
+      console.error("Error updating file:", error);
+      res.status(500).json({ message: "Failed to update file" });
     }
   });
 
