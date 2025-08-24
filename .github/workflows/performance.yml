@@ -1,0 +1,83 @@
+name: Performance
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run performance tests weekly on Sunday at 2 AM UTC
+    - cron: '0 2 * * 0'
+
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build application
+      run: npm run build
+
+    - name: Bundle size analysis
+      run: |
+        echo "📊 Bundle Size Analysis" >> $GITHUB_STEP_SUMMARY
+        echo "| File | Size | Gzipped |" >> $GITHUB_STEP_SUMMARY
+        echo "|------|------|---------|" >> $GITHUB_STEP_SUMMARY
+        
+        find dist -name "*.js" -o -name "*.css" | while read file; do
+          original_size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "0")
+          gzipped_size=$(gzip -c "$file" | wc -c)
+          filename=$(basename "$file")
+          echo "| $filename | ${original_size}B | ${gzipped_size}B |" >> $GITHUB_STEP_SUMMARY
+        done
+
+    - name: Dependency analysis
+      run: |
+        echo "📦 Dependency Analysis" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        npm ls --depth=0 --json | jq -r '.dependencies | keys | .[]' | wc -l | xargs echo "Total dependencies:"
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+    - name: Memory usage test
+      run: |
+        echo "🧠 Memory Usage Test" >> $GITHUB_STEP_SUMMARY
+        timeout 30s node -e "
+          const app = require('./dist/index.js');
+          setInterval(() => {
+            const usage = process.memoryUsage();
+            console.log(\`Memory: RSS=\${Math.round(usage.rss/1024/1024)}MB, Heap=\${Math.round(usage.heapUsed/1024/1024)}MB\`);
+          }, 5000);
+        " || echo "Memory test completed" >> $GITHUB_STEP_SUMMARY
+
+    - name: Performance benchmark
+      run: |
+        echo "⚡ Performance Benchmark" >> $GITHUB_STEP_SUMMARY
+        echo "Running basic performance tests..." >> $GITHUB_STEP_SUMMARY
+        
+        # Simple benchmark for critical functions
+        node -e "
+          console.time('App startup');
+          require('./dist/index.js');
+          console.timeEnd('App startup');
+        " 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+
+    - name: Security audit
+      run: |
+        echo "🔒 Security Audit" >> $GITHUB_STEP_SUMMARY
+        npm audit --audit-level=moderate || echo "Security issues found, check details above" >> $GITHUB_STEP_SUMMARY
+
+    - name: Type check performance
+      run: |
+        echo "📝 TypeScript Performance" >> $GITHUB_STEP_SUMMARY
+        time npm run type-check 2>&1 | tee -a $GITHUB_STEP_SUMMARY

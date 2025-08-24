@@ -5,6 +5,8 @@ npm-debug.log*
 # Build outputs
 dist/
 build/
+.next/
+out/
 
 # Environment variables
 .env
@@ -18,6 +20,8 @@ build/
 *.pid
 *.seed
 *.pid.lock
+pids/
+logs/
 
 # Coverage directory used by tools like istanbul
 coverage/
@@ -40,14 +44,12 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
-
 # IDE and editor files
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-*
 
 # OS generated files
 .DS_Store
@@ -67,12 +69,29 @@ vite.config.ts.*
 # Test results
 test-results/
 coverage/
+.lighthouseci/
 
 # Temporary files
 *.tmp
 *.temp
+tmp/
+temp/
 
 # Database
 *.sqlite
 *.sqlite3
 *.db
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Security
+.secrets/
+*.pem
+*.key
+*.crt
+
+# Monitoring and logs
+lighthouse-results/
+performance-results/

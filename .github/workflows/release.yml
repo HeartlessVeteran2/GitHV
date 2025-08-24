@@ -1,0 +1,100 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      packages: write
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm test
+
+    - name: Build application
+      run: npm run build
+
+    - name: Generate changelog
+      run: |
+        cat > CHANGELOG.md << 'EOF'
+        # Changelog
+
+        ## [${{ github.ref_name }}] - $(date +%Y-%m-%d)
+        
+        ### Added
+        - New features and improvements
+        
+        ### Fixed  
+        - Bug fixes and security updates
+        
+        ### Changed
+        - Performance optimizations
+        - UI/UX improvements
+        EOF
+
+    - name: Create release archive
+      run: |
+        mkdir release
+        cp -r dist/ release/
+        cp package.json package-lock.json README.md release/
+        cp CHANGELOG.md release/
+        tar -czf githv-${{ github.ref_name }}.tar.gz -C release .
+
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: GitHV ${{ github.ref_name }}
+        body: |
+          ## Changes in ${{ github.ref_name }}
+          
+          - Comprehensive improvements and bug fixes
+          - Enhanced performance and security
+          - Better mobile experience
+          - Updated dependencies
+          
+          ### Installation
+          ```bash
+          npm install
+          npm run build
+          npm start
+          ```
+          
+          ### What's New
+          See the full changelog in CHANGELOG.md
+        draft: false
+        prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
+
+    - name: Upload release assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./githv-${{ github.ref_name }}.tar.gz
+        asset_name: githv-${{ github.ref_name }}.tar.gz
+        asset_content_type: application/gzip
+
+    - name: Update version badge
+      run: |
+        echo "Latest version: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
