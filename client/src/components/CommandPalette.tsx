@@ -19,7 +19,9 @@ import {
   Save,
   Zap,
   Mic,
-  Eye
+  Eye,
+  Cloud,
+  Github
 } from "lucide-react";
 
 interface CommandAction {
@@ -45,6 +47,7 @@ interface CommandPaletteProps {
   onSearch: () => void;
   onVoiceCommand: () => void;
   onPreviewToggle: () => void;
+  onCLICommand?: (command: string) => void;
 }
 
 export default function CommandPalette({
@@ -58,7 +61,8 @@ export default function CommandPalette({
   onRun,
   onSearch,
   onVoiceCommand,
-  onPreviewToggle
+  onPreviewToggle,
+  onCLICommand
 }: CommandPaletteProps) {
   const [searchValue, setSearchValue] = useState("");
 
@@ -196,6 +200,80 @@ export default function CommandPalette({
       category: "AI",
       keywords: ["complete", "ai", "suggest", "auto"],
       shortcut: "Ctrl Space"
+    },
+    
+    // CLI Tools
+    {
+      id: "cli-gcloud-projects",
+      title: "List GCloud Projects",
+      subtitle: "Show Google Cloud projects",
+      icon: Cloud,
+      action: () => onCLICommand?.("gcloud projects list"),
+      category: "CLI",
+      keywords: ["gcloud", "cloud", "projects", "google"]
+    },
+    {
+      id: "cli-gcloud-instances",
+      title: "List Compute Instances",
+      subtitle: "Show GCE instances",
+      icon: Cloud,
+      action: () => onCLICommand?.("gcloud compute instances list"),
+      category: "CLI",
+      keywords: ["gcloud", "compute", "instances", "vm"]
+    },
+    {
+      id: "cli-gh-repos",
+      title: "List GitHub Repos",
+      subtitle: "Show GitHub repositories",
+      icon: Github,
+      action: () => onCLICommand?.("gh repo list"),
+      category: "CLI",
+      keywords: ["gh", "github", "repos", "repositories"]
+    },
+    {
+      id: "cli-gh-issues",
+      title: "List GitHub Issues",
+      subtitle: "Show repository issues",
+      icon: Github,
+      action: () => onCLICommand?.("gh issue list"),
+      category: "CLI",
+      keywords: ["gh", "github", "issues", "bugs"]
+    },
+    {
+      id: "cli-gh-prs",
+      title: "List Pull Requests",
+      subtitle: "Show pull requests",
+      icon: Github,
+      action: () => onCLICommand?.("gh pr list"),
+      category: "CLI",
+      keywords: ["gh", "github", "pr", "pull", "requests"]
+    },
+    {
+      id: "cli-gemini-explain",
+      title: "Explain Code (Gemini)",
+      subtitle: "AI explanation of current code",
+      icon: Zap,
+      action: () => onCLICommand?.("gemini explain"),
+      category: "CLI",
+      keywords: ["gemini", "explain", "ai", "code"]
+    },
+    {
+      id: "cli-gemini-analyze",
+      title: "Analyze Code (Gemini)",
+      subtitle: "AI code analysis and suggestions",
+      icon: Zap,
+      action: () => onCLICommand?.("gemini analyze"),
+      category: "CLI",
+      keywords: ["gemini", "analyze", "ai", "quality"]
+    },
+    {
+      id: "cli-gemini-test",
+      title: "Generate Tests (Gemini)",
+      subtitle: "AI-generated unit tests",
+      icon: Zap,
+      action: () => onCLICommand?.("gemini test"),
+      category: "CLI",
+      keywords: ["gemini", "test", "ai", "generate"]
     },
     
     // Settings

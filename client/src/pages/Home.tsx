@@ -299,7 +299,15 @@ export default function Home() {
             />
           )}
           
-          {terminalVisible && <Terminal isOpen={terminalVisible} onClose={() => setTerminalVisible(false)} />}
+          {terminalVisible && (
+            <Terminal 
+              isOpen={terminalVisible} 
+              onClose={() => setTerminalVisible(false)}
+              currentCode={openFiles.find(f => f.id === activeFileId)?.content || ''}
+              currentLanguage={openFiles.find(f => f.id === activeFileId)?.path.split('.').pop() || 'javascript'}
+              currentFileName={openFiles.find(f => f.id === activeFileId)?.path.split('/').pop() || 'untitled'}
+            />
+          )}
         </div>
       </div>
     </div>

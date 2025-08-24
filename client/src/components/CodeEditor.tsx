@@ -60,6 +60,13 @@ export default function CodeEditor({
   const [showProjectTemplates] = useState(false);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
 
+  // CLI command handler
+  const handleCLICommand = async (command: string) => {
+    console.log('Executing CLI command:', command);
+    // This could be enhanced to show CLI execution status or results
+    // For now, it logs the command - the actual execution will happen in the terminal
+  };
+
   useEffect(() => {
     setTabs(openFiles.map(file => ({
       id: file.id,
@@ -438,6 +445,7 @@ export default function CodeEditor({
         onSearch={() => console.log('Search opened')}
         onVoiceCommand={() => setIsListeningVoice(true)}
         onPreviewToggle={() => setIsPreviewVisible(!isPreviewVisible)}
+        onCLICommand={handleCLICommand}
       />
 
 

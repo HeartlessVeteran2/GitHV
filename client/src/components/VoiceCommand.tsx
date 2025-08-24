@@ -147,6 +147,30 @@ export default function VoiceCommand({
       action: "settings",
       description: "Open settings",
       examples: ["Open settings", "Show preferences"]
+    },
+    {
+      trigger: ["gcloud projects", "list projects", "cloud projects"],
+      action: "cli-gcloud-projects",
+      description: "List Google Cloud projects",
+      examples: ["List Google Cloud projects", "Show GCloud projects"]
+    },
+    {
+      trigger: ["github repos", "list repos", "show repositories"],
+      action: "cli-gh-repos",
+      description: "List GitHub repositories",
+      examples: ["List GitHub repos", "Show repositories"]
+    },
+    {
+      trigger: ["explain code", "gemini explain", "analyze this"],
+      action: "cli-gemini-explain",
+      description: "Explain code with Gemini AI",
+      examples: ["Explain this code", "What does this do"]
+    },
+    {
+      trigger: ["generate tests", "create tests", "gemini tests"],
+      action: "cli-gemini-test",
+      description: "Generate tests with Gemini AI",
+      examples: ["Generate tests", "Create unit tests"]
     }
   ];
 

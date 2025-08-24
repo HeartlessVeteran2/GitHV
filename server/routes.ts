@@ -26,6 +26,7 @@ import {
 import { GitHubService } from "./github";
 import { insertRepositorySchema, insertFileSchema } from "@shared/schema";
 import aiRoutes from "./routes/ai";
+import cliRoutes from "./cli/index";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -52,6 +53,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // AI routes
   app.use('/api/ai', aiRoutes);
+
+  // CLI routes
+  app.use('/api/cli', cliRoutes);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {

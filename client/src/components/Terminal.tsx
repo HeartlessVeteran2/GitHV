@@ -8,6 +8,9 @@ interface TerminalProps {
   isOpen: boolean;
   onClose: () => void;
   theme?: 'dark' | 'light';
+  currentCode?: string;
+  currentLanguage?: string;
+  currentFileName?: string;
 }
 
 interface TerminalLine {
@@ -17,18 +20,25 @@ interface TerminalLine {
   timestamp: Date;
 }
 
-export default function Terminal({ isOpen, onClose, theme = 'dark' }: TerminalProps) {
+export default function Terminal({ 
+  isOpen, 
+  onClose, 
+  theme = 'dark',
+  currentCode,
+  currentLanguage,
+  currentFileName
+}: TerminalProps) {
   const [lines, setLines] = useState<TerminalLine[]>([
     {
       id: '1',
       type: 'output',
-      content: 'GitHV Terminal v1.0.0',
+      content: 'GitHV Terminal v1.0.0 - Enhanced with CLI Integration',
       timestamp: new Date()
     },
     {
       id: '2',
       type: 'output',
-      content: 'Type "help" for available commands',
+      content: 'Type "help" for available commands, or try "gcloud", "gh", "gemini"',
       timestamp: new Date()
     }
   ]);
@@ -36,8 +46,52 @@ export default function Terminal({ isOpen, onClose, theme = 'dark' }: TerminalPr
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isMaximized, setIsMaximized] = useState(false);
+  const [isExecuting, setIsExecuting] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Execute CLI commands via backend API
+  const executeCLICommand = async (command: string): Promise<TerminalLine[]> => {
+    try {
+      const response = await fetch('/api/cli/execute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          command,
+          code: currentCode,
+          language: currentLanguage,
+          fileName: currentFileName
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        return [{
+          id: Date.now().toString(),
+          type: 'output',
+          content: result.output,
+          timestamp: new Date()
+        }];
+      } else {
+        return [{
+          id: Date.now().toString(),
+          type: 'error',
+          content: result.error || 'Command failed',
+          timestamp: new Date()
+        }];
+      }
+    } catch (error: any) {
+      return [{
+        id: Date.now().toString(),
+        type: 'error',
+        content: `Network error: ${error.message}`,
+        timestamp: new Date()
+      }];
+    }
+  };
 
   // Auto-scroll to bottom when new lines are added
   useEffect(() => {
@@ -53,7 +107,7 @@ export default function Terminal({ isOpen, onClose, theme = 'dark' }: TerminalPr
     }
   }, [isOpen]);
 
-  const executeCommand = (command: string) => {
+  const executeCommand = async (command: string) => {
     const trimmedCommand = command.trim();
     
     // Add command to history
@@ -70,7 +124,39 @@ export default function Terminal({ isOpen, onClose, theme = 'dark' }: TerminalPr
     
     setLines(prev => [...prev, inputLine]);
     
-    // Process command
+    // Check if it's a CLI command (gcloud, gh, gemini)
+    const commandLower = trimmedCommand.toLowerCase();
+    if (commandLower.startsWith('gcloud') || commandLower.startsWith('gh ') || commandLower.startsWith('gemini')) {
+      setIsExecuting(true);
+      
+      // Add "executing" indicator
+      const executingLine: TerminalLine = {
+        id: Date.now().toString() + '_exec',
+        type: 'output',
+        content: 'Executing...',
+        timestamp: new Date()
+      };
+      setLines(prev => [...prev, executingLine]);
+      
+      try {
+        const outputLines = await executeCLICommand(trimmedCommand);
+        // Remove the "executing" line and add actual output
+        setLines(prev => prev.filter(line => line.id !== executingLine.id).concat(outputLines));
+      } catch (error) {
+        const errorLine: TerminalLine = {
+          id: Date.now().toString(),
+          type: 'error',
+          content: `Failed to execute command: ${error}`,
+          timestamp: new Date()
+        };
+        setLines(prev => prev.filter(line => line.id !== executingLine.id).concat([errorLine]));
+      } finally {
+        setIsExecuting(false);
+      }
+      return;
+    }
+    
+    // Process built-in commands
     let outputLines: TerminalLine[] = [];
     
     switch (trimmedCommand.toLowerCase()) {
@@ -122,6 +208,48 @@ export default function Terminal({ isOpen, onClose, theme = 'dark' }: TerminalPr
             id: Date.now().toString() + '8',
             type: 'output',
             content: '  run      - Run current file',
+            timestamp: new Date()
+          },
+          {
+            id: Date.now().toString() + '9',
+            type: 'output',
+            content: '',
+            timestamp: new Date()
+          },
+          {
+            id: Date.now().toString() + '10',
+            type: 'output',
+            content: 'CLI Tools:',
+            timestamp: new Date()
+          },
+          {
+            id: Date.now().toString() + '11',
+            type: 'output',
+            content: '  gcloud   - Google Cloud CLI commands',
+            timestamp: new Date()
+          },
+          {
+            id: Date.now().toString() + '12',
+            type: 'output',
+            content: '  gh       - GitHub CLI commands',
+            timestamp: new Date()
+          },
+          {
+            id: Date.now().toString() + '13',
+            type: 'output',
+            content: '  gemini   - Gemini AI CLI commands',
+            timestamp: new Date()
+          },
+          {
+            id: Date.now().toString() + '14',
+            type: 'output',
+            content: '',
+            timestamp: new Date()
+          },
+          {
+            id: Date.now().toString() + '15',
+            type: 'output',
+            content: 'Examples: "gcloud projects list", "gh repo list", "gemini explain"',
             timestamp: new Date()
           }
         ];
@@ -216,10 +344,12 @@ export default function Terminal({ isOpen, onClose, theme = 'dark' }: TerminalPr
     setLines(prev => [...prev, ...outputLines]);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = async (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      executeCommand(currentInput);
-      setCurrentInput("");
+      if (!isExecuting) {
+        await executeCommand(currentInput);
+        setCurrentInput("");
+      }
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       if (commandHistory.length > 0) {
@@ -342,8 +472,9 @@ export default function Terminal({ isOpen, onClose, theme = 'dark' }: TerminalPr
           value={currentInput}
           onChange={(e) => setCurrentInput(e.target.value)}
           onKeyDown={handleKeyDown}
+          disabled={isExecuting}
           className="flex-1 bg-transparent border-none focus:ring-0 font-mono text-sm"
-          placeholder="Enter command..."
+          placeholder={isExecuting ? "Executing command..." : "Enter command..."}
         />
       </div>
     </div>
