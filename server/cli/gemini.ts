@@ -20,7 +20,7 @@ export async function executeGeminiCommand(
 
   try {
     switch (subCommand) {
-      case 'explain':
+      case 'explain': {
         if (!options.code || !options.language) {
           return {
             success: false,
@@ -33,8 +33,9 @@ export async function executeGeminiCommand(
           success: true,
           output: explanation
         };
+      }
 
-      case 'analyze':
+      case 'analyze': {
         if (!options.code || !options.language) {
           return {
             success: false,
@@ -47,9 +48,10 @@ export async function executeGeminiCommand(
           success: true,
           output: JSON.stringify(analysis, null, 2)
         };
+      }
 
       case 'test':
-      case 'tests':
+      case 'tests': {
         if (!options.code || !options.language) {
           return {
             success: false,
@@ -62,9 +64,10 @@ export async function executeGeminiCommand(
           success: true,
           output: tests
         };
+      }
 
       case 'docs':
-      case 'documentation':
+      case 'documentation': {
         if (!options.code || !options.language) {
           return {
             success: false,
@@ -77,8 +80,9 @@ export async function executeGeminiCommand(
           success: true,
           output: docs
         };
+      }
 
-      case 'refactor':
+      case 'refactor': {
         if (!options.code || !options.language || !options.instructions) {
           return {
             success: false,
@@ -91,9 +95,10 @@ export async function executeGeminiCommand(
           success: true,
           output: refactored
         };
+      }
 
       case 'complete':
-      case 'completion':
+      case 'completion': {
         if (!options.code || !options.language) {
           return {
             success: false,
@@ -110,6 +115,7 @@ export async function executeGeminiCommand(
           success: true,
           output: JSON.stringify(suggestions, null, 2)
         };
+      }
 
       case 'help':
         return {
@@ -130,11 +136,12 @@ export async function executeGeminiCommand(
           error: `Unknown Gemini command: ${subCommand}. Use "gemini help" for available commands.`
         };
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
     return {
       success: false,
       output: '',
-      error: `Gemini command failed: ${error.message}`
+      error: `Gemini command failed: ${err.message || 'Unknown error'}`
     };
   }
 }

@@ -1,23 +1,5 @@
 import { executeCommand, CLIResult, parseCommand } from './base';
 
-// Allowed gcloud commands for security
-const ALLOWED_GCLOUD_COMMANDS = [
-  'gcloud',
-  'version',
-  'auth',
-  'config',
-  'projects',
-  'compute',
-  'storage',
-  'functions',
-  'app',
-  'sql',
-  'container',
-  'iam',
-  'logging',
-  'monitoring'
-];
-
 // Safe gcloud subcommands
 const SAFE_SUBCOMMANDS = [
   'list',

@@ -10,7 +10,7 @@ import { formatOutput } from './base';
 const cliLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 30, // limit each user to 30 CLI commands per minute
-  keyGenerator: (req: any) => req?.user?.id || req.ip,
+  keyGenerator: (req: any) => req?.user?.id || req.ip, // eslint-disable-line @typescript-eslint/no-explicit-any
   message: "Too many CLI commands, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
@@ -56,8 +56,9 @@ router.post('/execute', isAuthenticated, cliLimiter, async (req, res) => {
       exitCode: result.exitCode
     });
 
-  } catch (error: any) {
-    console.error('CLI execution error:', error);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.error('CLI execution error:', err);
     res.status(500).json({ 
       success: false,
       error: 'CLI command execution failed',

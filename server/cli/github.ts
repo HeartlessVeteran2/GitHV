@@ -1,10 +1,5 @@
 import { executeCommand, CLIResult, parseCommand } from './base';
 
-// Allowed GitHub CLI commands for security
-const ALLOWED_GH_COMMANDS = [
-  'gh'
-];
-
 // Safe gh subcommands (read-only operations)
 const SAFE_SUBCOMMANDS = [
   'auth status',

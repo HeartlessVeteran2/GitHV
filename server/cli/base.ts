@@ -1,4 +1,4 @@
-import { spawn, exec } from 'child_process';
+import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
@@ -56,12 +56,13 @@ export async function executeCommand({
       output: stdout || stderr || 'Command executed successfully',
       exitCode: 0
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { message?: string; code?: number };
     return {
       success: false,
       output: '',
-      error: error.message || 'Command execution failed',
-      exitCode: error.code || 1
+      error: err.message || 'Command execution failed',
+      exitCode: err.code || 1
     };
   }
 }
