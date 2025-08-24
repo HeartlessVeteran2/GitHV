@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -21,8 +17,6 @@ import {
   Settings, 
   Play,
   Save,
-  Folder,
-  Code,
   Zap,
   Mic,
   Eye

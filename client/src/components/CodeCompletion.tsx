@@ -25,12 +25,11 @@ export default function CodeCompletion({
   isVisible, 
   position, 
   onSelect, 
-  onClose, 
   currentLine, 
   language 
 }: CodeCompletionProps) {
   const [suggestions, setSuggestions] = useState<CodeSuggestion[]>([]);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

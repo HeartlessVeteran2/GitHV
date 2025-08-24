@@ -7,7 +7,6 @@ import type { File as FileType } from "@shared/schema";
 import CodeCompletion from "./CodeCompletion";
 import TouchToolbar from "./TouchToolbar";
 import CommandPalette from "./CommandPalette";
-// import SmartSearchBar from "./SmartSearchBar";
 import VoiceCommand from "./VoiceCommand";
 import CodeSnippets from "./CodeSnippets";
 import PerformanceMonitor from "./PerformanceMonitor";
@@ -52,13 +51,13 @@ export default function CodeEditor({
   const [currentLine, setCurrentLine] = useState("");
   const [showCommandPalette, setShowCommandPalette] = useState(false);
 
-  const [showVoiceCommands, setShowVoiceCommands] = useState(false);
+  const [showVoiceCommands] = useState(false);
   const [isListeningVoice, setIsListeningVoice] = useState(false);
-  const [showCodeSnippets, setShowCodeSnippets] = useState(false);
-  const [showPerformance, setShowPerformance] = useState(false);
-  const [showFileDiff, setShowFileDiff] = useState(false);
+  const [showCodeSnippets] = useState(false);
+  const [showPerformance] = useState(false);
+  const [showFileDiff] = useState(false);
   const [showGitVisualization, setShowGitVisualization] = useState(false);
-  const [showProjectTemplates, setShowProjectTemplates] = useState(false);
+  const [showProjectTemplates] = useState(false);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
 
   useEffect(() => {
