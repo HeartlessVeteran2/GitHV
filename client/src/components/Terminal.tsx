@@ -83,11 +83,17 @@ export default function Terminal({
           timestamp: new Date()
         }];
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      let errorMessage = "Network error";
+      if (error instanceof Error && error.message) {
+        errorMessage = `Network error: ${error.message}`;
+      } else if (typeof error === "string") {
+        errorMessage = `Network error: ${error}`;
+      }
       return [{
         id: Date.now().toString(),
         type: 'error',
-        content: `Network error: ${error.message}`,
+        content: errorMessage,
         timestamp: new Date()
       }];
     }
