@@ -24,8 +24,19 @@ export function validateEnvironment(): Environment {
     
     // Additional custom validations
     if (env.NODE_ENV === 'production') {
-      if (env.SESSION_SECRET === 'dev-session-secret') {
-        throw new Error('Production environment cannot use default session secret');
+      // Check for weak/default session secrets
+      const weakSessionSecrets = [
+        'dev-session-secret',
+        'default',
+        'changeme',
+        'password',
+        '12345678901234567890123456789012', // 32 chars, but weak
+      ];
+      const isWeakSecret =
+        weakSessionSecrets.includes(env.SESSION_SECRET) ||
+        /^([a-zA-Z0-9])\1+$/.test(env.SESSION_SECRET); // repeated single char
+      if (isWeakSecret) {
+        throw new Error('Production environment cannot use a weak or default session secret');
       }
       
       if (!env.DATABASE_URL.includes('ssl=true') && !env.DATABASE_URL.includes('localhost')) {
