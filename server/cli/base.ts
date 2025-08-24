@@ -36,17 +36,12 @@ export async function executeCommand({
     };
   }
 
-  // Sanitize arguments to prevent command injection
-  const sanitizedArgs = args.map(arg => {
-    // Remove potentially dangerous characters
-    return arg.replace(/[;&|`$(){}[\]<>]/g, '');
-  });
+  // Validate arguments: ensure all are strings and not empty
+  const validatedArgs = args.filter(arg => typeof arg === 'string' && arg.length > 0);
 
   try {
-    const fullCommand = `${command} ${sanitizedArgs.join(' ')}`;
-    
-    // Execute with timeout
-    const { stdout, stderr } = await execAsync(fullCommand, {
+    // Execute command securely without shell
+    const { stdout, stderr, code } = await spawnAsync(command, validatedArgs, {
       timeout,
       maxBuffer: 1024 * 1024 // 1MB buffer
     });
