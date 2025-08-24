@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
+import rateLimit from "express-rate-limit";
 import { setupAuth, isAuthenticated } from "./githubAuth";
 import { 
   generateCodeCompletion, 
@@ -17,6 +18,16 @@ import aiRoutes from "./routes/ai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
+
+  // Rate limiter middleware for authenticated GitHub API endpoints
+  const githubApiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 60, // limit each user to 60 requests per windowMs
+    keyGenerator: (req) => req?.user?.id || req.ip, // per-user if authenticated, fallback to IP
+    message: "Too many requests from this user, please try again later.",
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
   await setupAuth(app);
 
   // Health check endpoint
@@ -425,7 +436,7 @@ Provide a helpful, accurate response about the code or programming question.
     }
   });
 
-  app.get("/api/github/:owner/:repo/issues", isAuthenticated, async (req: any, res) => {
+  app.get("/api/github/:owner/:repo/issues", isAuthenticated, githubApiLimiter, async (req: any, res) => {
     try {
       const { owner, repo } = req.params;
       const { state = 'open' } = req.query;
@@ -445,7 +456,7 @@ Provide a helpful, accurate response about the code or programming question.
     }
   });
 
-  app.get("/api/github/:owner/:repo/releases", isAuthenticated, async (req: any, res) => {
+  app.get("/api/github/:owner/:repo/releases", isAuthenticated, githubApiLimiter, async (req: any, res) => {
     try {
       const { owner, repo } = req.params;
       const userId = req.user.id;
@@ -464,7 +475,7 @@ Provide a helpful, accurate response about the code or programming question.
     }
   });
 
-  app.get("/api/github/:owner/:repo/stats", isAuthenticated, async (req: any, res) => {
+  app.get("/api/github/:owner/:repo/stats", isAuthenticated, githubApiLimiter, async (req: any, res) => {
     try {
       const { owner, repo } = req.params;
       const userId = req.user.id;
