@@ -43,8 +43,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // GitHub OAuth integration - Remove since we're using GitHub as primary auth
-  // These routes are no longer needed as GitHub is our primary authentication method
 
   // Repository routes
   app.get('/api/repositories', isAuthenticated, async (req: any, res) => {
