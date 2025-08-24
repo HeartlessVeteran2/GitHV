@@ -31,7 +31,7 @@ jspm_packages/
 # Optional npm cache directory
 .npm
 
-# Optional REPL history
+# Optional history files
 .node_repl_history
 
 # Output of 'npm pack'
