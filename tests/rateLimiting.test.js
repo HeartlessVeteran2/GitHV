@@ -137,6 +137,35 @@ describe('Rate Limiting Security', () => {
       expect(key).toMatch(/^ip:[a-f0-9]{16}$/);
     });
 
+    test('should generate different keys for identical IPs but different Accept-Language headers', () => {
+      const mockReq1 = {
+        get: jest.fn((header) => {
+          if (header === 'User-Agent') return 'test-agent';
+          if (header === 'Accept-Language') return 'en-US';
+          if (header === 'X-Forwarded-For') return null;
+          return null;
+        }),
+        ip: '192.168.1.1'
+      };
+
+      const mockReq2 = {
+        get: jest.fn((header) => {
+          if (header === 'User-Agent') return 'test-agent';
+          if (header === 'Accept-Language') return 'fr-FR';
+          if (header === 'X-Forwarded-For') return null;
+          return null;
+        }),
+        ip: '192.168.1.1'
+      };
+
+      const key1 = secureKeyGenerator(mockReq1);
+      const key2 = secureKeyGenerator(mockReq2);
+
+      expect(key1).not.toEqual(key2);
+      expect(key1).toMatch(/^ip:[a-f0-9]{16}$/);
+      expect(key2).toMatch(/^ip:[a-f0-9]{16}$/);
+    });
+
     test('should generate different keys for different IP/header combinations', () => {
       const mockReq1 = {
         user: null,
