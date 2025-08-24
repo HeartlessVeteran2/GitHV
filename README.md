@@ -12,6 +12,7 @@ A streamlined, tablet-optimized web-based IDE designed as a personal development
 - **File Management**: Complete file operations with auto-save functionality
 - **Interactive Terminal**: Full command-line interface with history and auto-complete
 - **Git Integration**: Version control with commit, push, pull, and branch management
+- **CLI Integration**: Google Cloud CLI, GitHub CLI, and Gemini AI CLI support
 
 ### AI-Powered Development
 - **Gemini 2.5 Pro Integration**: Advanced AI coding assistance
@@ -19,6 +20,7 @@ A streamlined, tablet-optimized web-based IDE designed as a personal development
 - **Context-Aware Chat**: AI assistant with code understanding
 - **Code Analysis**: Quality scoring and complexity analysis
 - **Test Generation**: Automated unit test creation
+- **CLI AI Commands**: Terminal-based AI operations (explain, analyze, test generation)
 
 ### Mobile-First Design
 - **Touch-Optimized Interface**: Responsive design from phone to desktop
@@ -32,6 +34,12 @@ A streamlined, tablet-optimized web-based IDE designed as a personal development
 - **Device Simulation**: Desktop, tablet, and mobile viewport presets
 - **Live Preview**: Real-time web application testing
 - **Source Code View**: HTML inspection and debugging tools
+
+### CLI Integration
+- **Google Cloud CLI**: Secure access to gcloud commands for project management, compute resources, and service monitoring
+- **GitHub CLI**: Direct integration with gh commands for repository management, issues, PRs, and workflows
+- **Gemini AI CLI**: Terminal-based AI commands for code analysis, explanation, test generation, and documentation
+- **Security Controls**: Command whitelisting, input sanitization, and read-only operation enforcement
 
 ## 🛠 Technology Stack
 
@@ -142,6 +150,69 @@ GitHV is optimized for mobile and tablet use:
 - **Network detection**: Offline mode indicators
 - **Screen wake lock**: Prevents screen timeout during coding
 
+## 🔧 CLI Usage
+
+GitHV includes integrated CLI tools accessible through the terminal:
+
+### Google Cloud CLI
+```bash
+# List projects
+gcloud projects list
+
+# Show compute instances
+gcloud compute instances list
+
+# List storage buckets
+gcloud storage buckets list
+
+# Show configuration
+gcloud config list
+
+# Get help
+gcloud help
+```
+
+### GitHub CLI
+```bash
+# List repositories
+gh repo list
+
+# Show repository info
+gh repo view owner/repo
+
+# List issues
+gh issue list
+
+# Show pull requests
+gh pr list
+
+# Check authentication
+gh auth status
+
+# Get help
+gh help
+```
+
+### Gemini AI CLI
+```bash
+# Explain current code
+gemini explain
+
+# Analyze code quality
+gemini analyze
+
+# Generate unit tests
+gemini test
+
+# Generate documentation
+gemini docs
+
+# Get help
+gemini help
+```
+
+**Security Note**: Only read-only commands are allowed for security. All commands are filtered and sanitized.
+
 ## 🔧 Configuration
 
 ### Editor Settings
@@ -199,6 +270,11 @@ Uses GitHub OAuth for secure authentication:
 - `POST /api/ai/suggest` - Get code suggestions
 - `POST /api/ai/chat` - AI conversation
 - `POST /api/ai/analyze` - Code analysis
+
+### CLI Integration
+- `POST /api/cli/execute` - Execute CLI commands (gcloud, gh, gemini)
+- `GET /api/cli/help/:tool` - Get CLI tool help documentation
+- `GET /api/cli/status` - Check CLI tool availability and versions
 
 ## 🤝 Contributing
 
