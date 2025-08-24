@@ -1,23 +1,11 @@
 import { Router } from "express";
 import { isAuthenticated } from "../githubAuth";
-import rateLimit from "express-rate-limit";
-
-const analyzeLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: "Too many requests to /analyze, please try again later."
-});
-
-const generateTestsLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: "Too many requests to /generate-tests, please try again later."
-});
+import { aiApiLimiter } from "../security/rateLimiting";
 
 const router = Router();
 
 // AI Chat endpoint
-router.post('/chat', isAuthenticated, async (req, res) => {
+router.post('/chat', isAuthenticated, aiApiLimiter, async (req, res) => {
   try {
     const { message, code, language, fileName, history, personality } = req.body;
 
@@ -66,7 +54,7 @@ Please provide a helpful response about the code that matches your personality a
 });
 
 // AI Code Suggestions endpoint
-router.post('/code-suggestions', isAuthenticated, async (req, res) => {
+router.post('/code-suggestions', isAuthenticated, aiApiLimiter, async (req, res) => {
   try {
     const { code, language, fileName, cursorPosition, selectedText, personality } = req.body;
 
@@ -137,7 +125,7 @@ Respond only with the JSON array, no other text.`;
 });
 
 // AI Code Analysis endpoint  
-router.post('/analyze', isAuthenticated, analyzeLimiter, async (req, res) => {
+router.post('/analyze', isAuthenticated, aiApiLimiter, async (req, res) => {
   try {
     const { code, language, fileName } = req.body;
 
@@ -221,7 +209,7 @@ Respond with JSON in this format:
 });
 
 // AI Test Generation endpoint
-router.post('/generate-tests', isAuthenticated, generateTestsLimiter, async (req, res) => {
+router.post('/generate-tests', isAuthenticated, aiApiLimiter, async (req, res) => {
   try {
     const { code, language, fileName } = req.body;
 
@@ -275,7 +263,7 @@ Respond with just the test code, no explanations.`;
 });
 
 // AI Documentation Generation endpoint
-router.post('/generate-docs', isAuthenticated, async (req, res) => {
+router.post('/generate-docs', isAuthenticated, aiApiLimiter, async (req, res) => {
   try {
     const { code, language, fileName } = req.body;
 
