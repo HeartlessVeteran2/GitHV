@@ -106,7 +106,7 @@ Security: Only safe, read-only commands are allowed.`;
 });
 
 // Check CLI tool availability
-router.get('/status', isAuthenticated, async (req, res) => {
+router.get('/status', isAuthenticated, cliLimiter, async (req, res) => {
   try {
     // Check if CLI tools are available
     const gcloudResult = await executeGcloudCommand('gcloud version');
