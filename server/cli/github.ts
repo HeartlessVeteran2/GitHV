@@ -47,9 +47,17 @@ export async function executeGitHubCommand(commandString: string): Promise<CLIRe
 
   // Check if it's a safe subcommand
   const subCommand = args.join(' ');
-  const isSafeCommand = SAFE_SUBCOMMANDS.some(safe => 
-    subCommand.startsWith(safe) || subCommand === 'help' || subCommand === 'version'
-  );
+  const SAFE_SUBCOMMAND_REGEXES = [
+    /^auth (status|list)$/,
+    /^repo (list|view|clone)$/,
+    /^issue (list|view)$/,
+    /^pr list$/,
+    /^help$/,
+    /^version$/
+  ];
+  const isSafeCommand =
+    SAFE_SUBCOMMANDS.includes(subCommand) ||
+    SAFE_SUBCOMMAND_REGEXES.some(regex => regex.test(subCommand));
 
   if (!isSafeCommand) {
     return {
