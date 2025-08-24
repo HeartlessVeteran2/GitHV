@@ -333,6 +333,17 @@ export class GitHubService {
     return response.data;
   }
 
+  async mergePullRequest(owner: string, repo: string, pullNumber: number, mergeMethod: 'merge' | 'squash' | 'rebase' = 'squash'): Promise<any> {
+    const response = await this.octokit.rest.pulls.merge({
+      owner,
+      repo,
+      pull_number: pullNumber,
+      merge_method: mergeMethod
+    });
+
+    return response.data;
+  }
+
   async createIssue(owner: string, repo: string, title: string, body: string, labels?: string[]): Promise<any> {
     const response = await this.octokit.rest.issues.create({
       owner,
