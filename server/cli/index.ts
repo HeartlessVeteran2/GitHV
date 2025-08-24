@@ -57,8 +57,7 @@ router.post('/execute', isAuthenticated, cliLimiter, async (req, res) => {
     });
 
   } catch (error: unknown) {
-    const err = error as { message?: string };
-    console.error('CLI execution error:', err);
+    handleError(error);
     res.status(500).json({ 
       success: false,
       error: 'CLI command execution failed',
