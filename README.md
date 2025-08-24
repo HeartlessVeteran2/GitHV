@@ -189,6 +189,16 @@ Uses GitHub OAuth for secure authentication:
 - `/api/auth/user` - Get current user info
 - `/api/auth/github/callback` - GitHub OAuth callback
 
+### Security Features
+GitHV implements comprehensive security measures:
+- **User-based Rate Limiting**: Prevents abuse with per-user request limits
+- **SHA-256 HMAC Verification**: Cryptographic validation for webhooks and sensitive operations
+- **Secure Key Generation**: Multi-factor request fingerprinting for enhanced protection
+- **Environment-based Configuration**: Secure secret management through environment variables
+- **Timing Attack Protection**: Uses timing-safe comparison for signature verification
+
+For detailed security information, see [SECURITY_ENHANCEMENTS.md](./SECURITY_ENHANCEMENTS.md).
+
 ### File Operations
 - `GET /api/repositories` - List user repositories
 - `GET /api/files/:repo` - Get repository files

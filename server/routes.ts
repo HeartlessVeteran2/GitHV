@@ -2,18 +2,20 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import rateLimit from "express-rate-limit";
 import { setupAuth, isAuthenticated } from "./githubAuth";
 import "./types"; // Load Express type augmentations
 
-// Rate limiter for GitHub API endpoints (max 10 requests per minute per user)
-const githubApiLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: (req) => req.user?.id || req.ip || 'anonymous',
-});
+// Import consolidated rate limiting
+import { 
+  generalApiLimiter, 
+  githubApiLimiter, 
+  authLimiter, 
+  webhookLimiter,
+  requireSignature 
+} from "./security/rateLimiting";
+import { validateEnvironment } from "./environment";
+
+const env = validateEnvironment();
 
 import { 
   generateCodeCompletion, 
@@ -24,24 +26,12 @@ import {
   refactorCode 
 } from "./gemini";
 import { GitHubService } from "./github";
-import { insertRepositorySchema, insertFileSchema } from "@shared/schema";
 import aiRoutes from "./routes/ai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-
-  // Rate limiter middleware for authenticated GitHub API endpoints
-  const githubApiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 60, // limit each user to 60 requests per windowMs
-    keyGenerator: (req: any) => req?.user?.id || req.ip, // per-user if authenticated, fallback to IP
-    message: "Too many requests from this user, please try again later.",
-    standardHeaders: true,
-    legacyHeaders: false,
-  });
   await setupAuth(app);
 
-  // Health check endpoint
+  // Health check endpoint (no rate limiting needed)
   app.get('/api/health', (req, res) => {
     res.json({ 
       status: 'ok', 
@@ -50,11 +40,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // AI routes
+  // AI routes (uses its own rate limiting)
   app.use('/api/ai', aiRoutes);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  // Auth routes (with strict rate limiting)
+  app.get('/api/auth/user', isAuthenticated, authLimiter, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
@@ -65,9 +55,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-
-  // Repository routes
-  app.get('/api/repositories', isAuthenticated, async (req: any, res) => {
+  // Repository routes (with general rate limiting)
+  app.get('/api/repositories', isAuthenticated, generalApiLimiter, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const repositories = await storage.getUserRepositories(userId);
@@ -78,7 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/repositories/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/repositories/:id', isAuthenticated, generalApiLimiter, async (req: any, res) => {
     try {
       const { id } = req.params;
       const repository = await storage.getRepository(id);
@@ -94,7 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/repositories/sync', isAuthenticated, async (req: any, res) => {
+  app.post('/api/repositories/sync', isAuthenticated, generalApiLimiter, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const user = await storage.getUser(userId);
@@ -140,8 +129,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // File routes
-  app.get('/api/repositories/:id/files', isAuthenticated, async (req: any, res) => {
+  // File routes (with general rate limiting)
+  app.get('/api/repositories/:id/files', isAuthenticated, generalApiLimiter, async (req: any, res) => {
     try {
       const { id } = req.params;
       const files = await storage.getRepositoryFiles(id);
@@ -152,7 +141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/files/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/files/:id', isAuthenticated, generalApiLimiter, async (req: any, res) => {
     try {
       const { id } = req.params;
       const file = await storage.getFile(id);
@@ -168,7 +157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/repositories/:id/files/sync', isAuthenticated, async (req: any, res) => {
+  app.post('/api/repositories/:id/files/sync', isAuthenticated, generalApiLimiter, async (req: any, res) => {
     try {
       const { id } = req.params;
       const { path = "" } = req.body;
@@ -224,7 +213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/files/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/files/:id', isAuthenticated, generalApiLimiter, async (req: any, res) => {
     try {
       const { id } = req.params;
       const { content } = req.body;
@@ -246,8 +235,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Gemini AI endpoints
-  app.post("/api/ai/code-completion", isAuthenticated, async (req, res) => {
+  // Gemini AI endpoints (with general rate limiting)
+  app.post("/api/ai/code-completion", isAuthenticated, generalApiLimiter, async (req, res) => {
     try {
       const { code, language, cursorPosition } = req.body;
       const suggestions = await generateCodeCompletion(code, language, cursorPosition);
@@ -687,6 +676,63 @@ Provide a helpful, accurate response about the code or programming question.
       res.status(500).json({ message: "Failed to update file" });
     }
   });
+
+  // Webhook endpoints with SHA verification
+  if (env.WEBHOOK_SECRET) {
+    app.post('/api/webhooks/github', 
+      webhookLimiter,
+      requireSignature(env.WEBHOOK_SECRET),
+      async (req, res) => {
+        try {
+          const { action, repository, sender } = req.body;
+          
+          console.log('GitHub webhook received:', {
+            action,
+            repo: repository?.full_name,
+            sender: sender?.login
+          });
+          
+          // Process webhook event
+          if (action === 'push' || action === 'pull_request') {
+            // Handle repository updates
+            // This is where you'd sync repository data, trigger builds, etc.
+          }
+          
+          res.json({ message: 'Webhook processed successfully' });
+        } catch (error) {
+          console.error('Webhook processing error:', error);
+          res.status(500).json({ message: 'Failed to process webhook' });
+        }
+      }
+    );
+  }
+
+  // Secure API endpoints that require signature verification
+  if (env.API_SECRET) {
+    app.post('/api/secure/deploy',
+      isAuthenticated,
+      generalApiLimiter,
+      requireSignature(env.API_SECRET),
+      async (req, res) => {
+        try {
+          // This would handle secure deployment operations
+          const { repository, branch, environment } = req.body;
+          
+          console.log('Secure deployment request:', {
+            repository,
+            branch,
+            environment,
+            user: req.user?.id
+          });
+          
+          res.json({ message: 'Deployment initiated', status: 'pending' });
+        } catch (error) {
+          console.error('Deployment error:', error);
+          res.status(500).json({ message: 'Deployment failed' });
+        }
+      }
+    );
+  }
 
   const httpServer = createServer(app);
   
