@@ -20,7 +20,7 @@
     "audit": "npm audit --audit-level=moderate"
   },
   "dependencies": {
-    "@google/genai": "^1.14.0",
+    "@google/genai": "^1.15.0",
     "@hookform/resolvers": "^5.0.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@monaco-editor/react": "^4.7.0",
