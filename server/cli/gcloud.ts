@@ -42,10 +42,8 @@ export async function executeGcloudCommand(commandString: string): Promise<CLIRe
   }
 
   // Check if it's a safe subcommand
-  const subCommand = args.join(' ');
-  const isSafeCommand = SAFE_SUBCOMMANDS.some(safe => 
-    subCommand.startsWith(safe) || subCommand === 'help' || subCommand === 'version'
-  );
+  const subCommand = args.join(' ').trim();
+  const isSafeCommand = SAFE_SUBCOMMANDS.includes(subCommand);
 
   if (!isSafeCommand) {
     return {
