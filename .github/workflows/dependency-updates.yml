@@ -84,7 +84,7 @@ jobs:
         ncu --target major --format group >> major_updates.md || true
     
     - name: Create issue for major updates
-      uses: peter-evans/create-issue-from-file@v4
+      uses: peter-evans/create-issue-from-file@v5
       if: hashFiles('major_updates.md') != ''
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
