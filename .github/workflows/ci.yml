@@ -83,7 +83,7 @@ jobs:
       run: npm audit --audit-level=moderate
     
     - name: Check for vulnerabilities
-      uses: github/super-linter@v4
+      uses: github/super-linter@v7
       env:
         DEFAULT_BRANCH: main
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
