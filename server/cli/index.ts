@@ -67,7 +67,7 @@ router.post('/execute', isAuthenticated, cliLimiter, async (req, res) => {
 });
 
 // Get help for CLI tools
-router.get('/help/:tool?', isAuthenticated, (req, res) => {
+router.get('/help/:tool?', isAuthenticated, cliLimiter, (req, res) => {
   const { tool } = req.params;
   
   let helpText = '';
