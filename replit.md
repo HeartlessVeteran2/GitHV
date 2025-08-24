@@ -1,22 +1,23 @@
 # Overview
 
-GitHV is a comprehensive tablet-optimized web-based IDE designed as a personal development environment. This private coding workspace provides extensive development tools including Gemini 2.5 Pro AI-powered code assistance, real-time collaboration, advanced Git integration, a floating AI assistant, mobile-first touch interactions, and a dedicated browser-optimized web viewer for the code space. It delivers a full-featured development experience with syntax highlighting, file management, terminal access, professional IDE features, and resource-efficient web preview capabilities, all optimized for touch interfaces across phones, tablets, and desktops as a personal workspace. Its business vision is to provide a fully integrated and personal coding solution that adapts seamlessly to various device form factors, maximizing productivity and minimizing context switching for developers on the go.
+GitHV is a streamlined, tablet-optimized web-based IDE designed as a personal development environment. This private coding workspace provides essential development tools including Gemini AI-powered code assistance, Git integration, file management, terminal access, and mobile-first touch interactions. The application has been modernized with a cleaner tech stack, essential workflows only, and improved development tooling for better maintainability and performance.
 
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
 App Purpose: Personal development environment - not for public sharing or distribution.
+Focus: Simplicity, performance, and essential features only.
 
 # System Architecture
 
 ## Frontend Architecture
-- **React-based SPA**: Built with React 18, TypeScript, and Vite.
+- **React-based SPA**: Built with React 19, TypeScript, and Vite.
 - **Component Library**: Uses shadcn/ui components built on Radix UI primitives for consistent, accessible UI.
-- **Styling**: Tailwind CSS with a custom dark theme design system.
+- **Styling**: Tailwind CSS 4 with modern design system and PostCSS integration.
 - **State Management**: TanStack Query for server state, local React state for UI state.
 - **Routing**: Wouter for lightweight client-side routing.
 - **Monaco Editor**: Full-featured code editor with syntax highlighting and IntelliSense support.
-- **UI/UX Decisions**: Android Studio-inspired layout with resizable panels, multi-tab code editor, and professional IDE color schemes. It includes an advanced touch bar, intelligent gesture system, and adaptive interface for mobile and tablet optimization, alongside dynamic CSS variables for device detection.
+- **UI/UX Decisions**: Android Studio-inspired layout with resizable panels, multi-tab code editor, and professional IDE color schemes optimized for mobile and desktop.
 
 ## Backend Architecture
 - **Express.js API**: RESTful API server with TypeScript support.
@@ -38,11 +39,12 @@ App Purpose: Personal development environment - not for public sharing or distri
 - **Change Tracking**: File modification detection and sync status management.
 
 ## System Design Choices
-- **Device-Adaptive Interface**: Intelligent device detection automatically identifies phone, tablet, or desktop mode, with responsive layout and phone-first optimizations.
-- **Resource-Optimized Web Viewer**: Lightweight embedded browser for code space preview with device emulation, smart navigation, and developer tools.
-- **AI Integration**: Gemini 2.5 Pro AI powers code assistance, real-time analysis, completions, refactoring, bug fixes, and test generation via a context-aware floating assistant and dedicated panel.
-- **Real-Time Collaboration**: WebSocket-based live code synchronization and cursor position sharing.
-- **Touch-Optimized Interface**: Responsive design with touch-specific features like a floating touch toolbar, intelligent gesture system, and mobile-optimized file manager.
+- **Simplified Architecture**: Focus on essential features with clean, maintainable code.
+- **Modern Tooling**: Latest versions of React, TypeScript, and build tools for better performance.
+- **Streamlined Workflows**: Only essential CI/CD workflows for security and basic testing.
+- **Performance First**: Optimized bundle sizes and efficient resource loading.
+- **Mobile-Responsive**: Touch-friendly interface that works across devices.
+- **Essential AI Integration**: Gemini AI for code assistance without overwhelming complexity.
 
 # External Dependencies
 
@@ -59,9 +61,14 @@ App Purpose: Personal development environment - not for public sharing or distri
 
 ## UI/UX Libraries
 - **Radix UI**: Headless UI components.
-- **Tailwind CSS**: Utility-first CSS framework.
+- **Tailwind CSS 4**: Utility-first CSS framework with modern features.
 - **Lucide Icons**: Icon library.
 - **Wouter**: Lightweight routing solution.
+
+## Quality Assurance
+- **ESLint & Prettier**: Code quality and formatting.
+- **Jest**: Testing framework.
+- **TypeScript**: Static type checking.
 
 ## Runtime Dependencies
 - **Node.js**: Runtime environment.

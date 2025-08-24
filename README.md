@@ -1,8 +1,8 @@
 # GitHV - Personal Web-Based IDE
 
-A comprehensive tablet-optimized web-based IDE designed as a personal development environment. This private coding workspace provides extensive development tools including AI-powered code assistance, real-time collaboration, advanced Git integration, and mobile-first touch interactions.
+A streamlined, tablet-optimized web-based IDE designed as a personal development environment. This private coding workspace provides essential development tools including AI-powered code assistance, Git integration, and mobile-first touch interactions.
 
-![GitHV IDE Interface](https://img.shields.io/badge/Platform-Web-blue) ![React](https://img.shields.io/badge/React-18-61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6) ![Node.js](https://img.shields.io/badge/Node.js-20-339933)
+![GitHV IDE Interface](https://img.shields.io/badge/Platform-Web-blue) ![React](https://img.shields.io/badge/React-19-61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6) ![Node.js](https://img.shields.io/badge/Node.js-22-339933)
 
 ## 🚀 Features
 
@@ -36,9 +36,9 @@ A comprehensive tablet-optimized web-based IDE designed as a personal developmen
 ## 🛠 Technology Stack
 
 ### Frontend
-- **React 18** with TypeScript
+- **React 19** with TypeScript
 - **Vite** for fast development and building
-- **Tailwind CSS** with shadcn/ui components
+- **Tailwind CSS 4** with shadcn/ui components
 - **Monaco Editor** for code editing
 - **TanStack Query** for state management
 - **Wouter** for client-side routing
@@ -55,6 +55,12 @@ A comprehensive tablet-optimized web-based IDE designed as a personal developmen
 - **Session management** with PostgreSQL store
 - **GitHub API** integration for repository access
 - **Replit Deployments** for hosting
+
+### Development Tools
+- **ESLint & Prettier** for code quality
+- **Jest** for testing
+- **TypeScript** for type safety
+- **Streamlined CI/CD** with essential workflows only
 
 ## 🚦 Getting Started
 
@@ -102,6 +108,21 @@ A comprehensive tablet-optimized web-based IDE designed as a personal developmen
 
 6. **Open in browser**
    Navigate to `http://localhost:5000`
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production  
+- `npm run start` - Start production server
+- `npm run type-check` - Run TypeScript checking
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Fix ESLint issues automatically
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
+- `npm run test` - Run tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage
+- `npm run audit` - Check for security vulnerabilities
 
 ## 📱 Mobile Usage
 
