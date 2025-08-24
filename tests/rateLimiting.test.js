@@ -46,6 +46,13 @@ describe('Rate Limiting Security', () => {
       expect(verifyRequestSignature(payload, 'sha256=invalid-signature', secret)).toBe(false);
     });
 
+    test('should reject requests with empty string as signature', () => {
+      const secret = 'test-webhook-secret-123456789012';
+      const payload = JSON.stringify({ test: 'data' });
+
+      expect(verifyRequestSignature(payload, '', secret)).toBe(false);
+    });
+
     test('should reject requests without signatures', () => {
       const secret = 'test-webhook-secret-123456789012';
       const payload = JSON.stringify({ test: 'data' });
