@@ -39,15 +39,27 @@ export function validateEnvironment(): Environment {
         throw new Error('Production environment cannot use a weak or default session secret');
       }
       
-      if (!env.DATABASE_URL.includes('ssl=true') && !env.DATABASE_URL.includes('localhost')) {
-        console.warn('Warning: Production database connection may not be using SSL');
+      try {
+        const dbUrl = new URL(env.DATABASE_URL);
+        const sslEnabled = dbUrl.searchParams.get('ssl') === 'true';
+        const isLocalhost = ['localhost', '127.0.0.1'].includes(dbUrl.hostname);
+        if (!sslEnabled && !isLocalhost) {
+          console.warn('Warning: Production database connection may not be using SSL');
+        }
+      } catch (e) {
+        console.warn('Warning: Could not parse DATABASE_URL for SSL check:', e);
       }
     }
     
     if (env.NODE_ENV === 'development') {
       console.log('🔧 Development environment detected');
-      if (env.DATABASE_URL.includes('localhost') || env.DATABASE_URL.includes('127.0.0.1')) {
-        console.log('📍 Using local database');
+      try {
+        const dbUrl = new URL(env.DATABASE_URL);
+        if (['localhost', '127.0.0.1'].includes(dbUrl.hostname)) {
+          console.log('📍 Using local database');
+        }
+      } catch (e) {
+        console.log('📍 Could not parse DATABASE_URL for local database check:', e);
       }
     }
     
