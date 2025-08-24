@@ -37,7 +37,7 @@ jobs:
         SESSION_SECRET: test-secret
     
     - name: Run Lighthouse
-      uses: treosh/lighthouse-ci-action@v10
+      uses: treosh/lighthouse-ci-action@v12
       with:
         urls: |
           http://localhost:5000
@@ -46,7 +46,7 @@ jobs:
         temporaryPublicStorage: true
     
     - name: Comment PR with Lighthouse results
-      uses: treosh/lighthouse-ci-action@v10
+      uses: treosh/lighthouse-ci-action@v12
       if: github.event_name == 'pull_request'
       with:
         urls: |
