@@ -86,14 +86,10 @@ jobs:
         prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
 
     - name: Upload release assets
-      uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./githv-${{ github.ref_name }}.tar.gz
-        asset_name: githv-${{ github.ref_name }}.tar.gz
-        asset_content_type: application/gzip
+      run: |
+        gh release upload "${{ github.ref_name }}" "./githv-${{ github.ref_name }}.tar.gz" --clobber
 
     - name: Update version badge
       run: |
