@@ -1,0 +1,67 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm test
+
+    - name: Build application
+      run: npm run build
+
+    - name: Create deployment artifact
+      run: |
+        mkdir -p deploy
+        cp -r dist/ deploy/
+        cp package.json package-lock.json deploy/
+        cp -r public/ deploy/ || true
+        
+    - name: Upload deployment artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-${{ github.sha }}
+        path: deploy/
+        retention-days: 30
+
+    - name: Deploy to staging (on main)
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "Deploying to staging environment..."
+        echo "Deployment URL: https://githv-staging.example.com"
+        
+    - name: Deploy to production (on tag)
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        echo "Deploying to production environment..."
+        echo "Production URL: https://githv.example.com"
+
+    - name: Notify deployment status
+      if: always()
+      run: |
+        if [ ${{ job.status }} == 'success' ]; then
+          echo "✅ Deployment successful"
+        else
+          echo "❌ Deployment failed"
+        fi
